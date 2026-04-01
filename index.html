@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Scanner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: { light: '#f8fafc', dark: '#0f172a' }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-surface-light dark:bg-surface-dark text-gray-900 dark:text-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-lg font-bold flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-i18n="page.header">GitHub Scanner</span>
+      </h1>
+      <div class="flex items-center gap-3">
+        <select id="lang-switcher" class="text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="en">EN</option>
+          <option value="ko">KO</option>
+        </select>
+        <button id="dark-toggle" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Toggle dark mode">
+          <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.66 7.66l-.71-.71M4.05 4.05l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- ── Input Section ── -->
+    <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <form id="scan-form" class="space-y-4">
+
+        <!-- PAT -->
+        <div>
+          <label class="flex items-center gap-1.5 text-sm font-medium mb-1">
+            <span data-i18n="label.pat">Personal Access Token (PAT)</span>
+            <button type="button" id="pat-help-btn" class="text-gray-400 hover:text-indigo-500 dark:text-gray-500 dark:hover:text-indigo-400 transition-colors" title="Help">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </button>
+          </label>
+          <input type="text" id="input-pat" class="pat-input w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="ghp_xxxx..." autocomplete="off">
+        </div>
+
+        <!-- PAT Help -->
+        <div id="pat-help-panel" class="filter-panel">
+          <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 text-sm text-indigo-800 dark:text-indigo-200">
+            <p class="font-semibold mb-2" data-i18n="pat.help.title">PAT Help</p>
+            <p class="mb-2" data-i18n="pat.help.details">Generate a token at GitHub &gt; Settings &gt; Developer settings &gt; Personal access tokens.</p>
+            <div class="mt-2 space-y-1">
+              <p><code class="bg-indigo-100 dark:bg-indigo-800 px-1 rounded">read:org</code> — <span data-i18n="pat.scope.readOrg">Required for team and organization access</span></p>
+              <p><code class="bg-indigo-100 dark:bg-indigo-800 px-1 rounded">repo</code> — <span data-i18n="pat.scope.repo">Required for private repository access</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Org + Team row -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <div class="md:col-span-4">
+            <label class="block text-sm font-medium mb-1" data-i18n="label.org">Organization</label>
+            <input type="text" id="input-org" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="my-org">
+          </div>
+
+          <div class="md:col-span-2">
+            <button type="button" id="btn-load-teams" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 transition-colors disabled:opacity-50" data-i18n="team.loadBtn">Load Teams</button>
+          </div>
+
+          <div class="md:col-span-4 relative">
+            <label class="block text-sm font-medium mb-1" data-i18n="label.team">Team</label>
+            <div id="team-select-wrapper" class="relative">
+              <button type="button" id="team-select-btn" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-left text-sm flex items-center justify-between disabled:opacity-50" disabled>
+                <span id="team-select-label" class="truncate text-gray-400" data-i18n="team.placeholder">Select teams...</span>
+                <svg class="w-4 h-4 flex-shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              <div id="team-dropdown" class="hidden absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 flex gap-2">
+                  <button type="button" id="team-select-all" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline" data-i18n="team.selectAll">Select All</button>
+                  <button type="button" id="team-deselect-all" class="text-xs text-gray-500 hover:underline" data-i18n="team.deselectAll">Deselect All</button>
+                </div>
+                <div id="team-list" class="p-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <button type="submit" id="btn-scan" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span data-i18n="button.scan">Scan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected teams chips -->
+        <div id="team-chips" class="flex flex-wrap gap-1.5 empty:hidden"></div>
+
+      </form>
+    </section>
+
+    <!-- ── Loading ── -->
+    <div id="loading" class="hidden flex items-center justify-center gap-3 py-12">
+      <div class="spinner text-indigo-500"></div>
+      <span id="loading-text" class="text-gray-500 dark:text-gray-400" data-i18n="status.loading">Loading repositories...</span>
+    </div>
+
+    <!-- ── Error ── -->
+    <div id="error-banner" class="hidden mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl p-4 flex items-start gap-3">
+      <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+      <span id="error-message"></span>
+    </div>
+
+    <!-- ── Results ── -->
+    <section id="results-section" class="hidden space-y-4">
+
+      <!-- Toolbar: count + export + filters -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <!-- Left: count + filters -->
+          <div class="flex flex-wrap items-center gap-3">
+            <span id="result-count" class="text-sm font-medium text-gray-700 dark:text-gray-300"></span>
+            <div class="w-px h-5 bg-gray-200 dark:bg-gray-700 hidden md:block"></div>
+            <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+              <input type="checkbox" id="filter-archived" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
+              <span data-i18n="filter.showArchived">Show Archived</span>
+            </label>
+            <select id="filter-visibility" class="text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <option value="all" data-i18n="filter.visibility.all">All</option>
+              <option value="public" data-i18n="filter.visibility.public">Public</option>
+              <option value="private" data-i18n="filter.visibility.private">Private</option>
+            </select>
+            <!-- Permission -->
+            <div class="relative">
+              <button type="button" id="perm-select-btn" class="text-sm border border-gray-300 dark:border-gray-600 rounded px-2.5 py-1 flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <span data-i18n="filter.permission">Permission</span>
+                <span id="perm-badge" class="hidden bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200 text-xs rounded-full px-1.5">0</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              <div id="perm-dropdown" class="hidden absolute z-20 mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-2 space-y-1">
+                <label class="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="admin" class="perm-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span data-i18n="filter.permission.admin">Admin</span></label>
+                <label class="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="maintain" class="perm-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span data-i18n="filter.permission.maintain">Maintain</span></label>
+                <label class="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="push" class="perm-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span data-i18n="filter.permission.push">Write</span></label>
+                <label class="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="triage" class="perm-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span data-i18n="filter.permission.triage">Triage</span></label>
+                <label class="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"><input type="checkbox" value="pull" class="perm-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span data-i18n="filter.permission.pull">Read</span></label>
+              </div>
+            </div>
+          </div>
+          <!-- Right: export -->
+          <div class="flex items-center gap-2">
+            <button id="btn-copy-md" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5" title="Exports all repos, not just current page">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+              <span data-i18n="button.copyMarkdown">Copy Markdown</span>
+            </button>
+            <button id="btn-csv" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5" title="Exports all repos, not just current page">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span data-i18n="button.downloadCsv">Download CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <table class="repo-table w-full text-sm table-fixed">
+          <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+            <tr>
+              <th class="sortable px-5 py-3 text-left w-[35%]" data-sort="name" data-i18n="table.name">Name</th>
+              <th class="px-5 py-3 text-left w-[35%]" data-i18n="table.description">Description</th>
+              <th class="sortable px-5 py-3 text-left w-[15%]" data-sort="updatedAt" data-i18n="table.updated">Updated</th>
+              <th class="sortable px-5 py-3 text-center w-[15%]" data-sort="permission">Permission</th>
+            </tr>
+          </thead>
+          <tbody id="repo-tbody" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <span data-i18n="pagination.perPage">Per page</span>
+          <select id="page-size" class="bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <option value="10">10</option>
+            <option value="30" selected>30</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-prev" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" data-i18n="pagination.prev">Previous</button>
+          <span id="page-info" class="text-sm text-gray-500 dark:text-gray-400"></span>
+          <button id="btn-next" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" data-i18n="pagination.next">Next</button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden text-center py-16 text-gray-400 dark:text-gray-500">
+        <svg class="w-16 h-16 mx-auto mb-4 opacity-40" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
+        <p class="text-lg" data-i18n="status.empty">No repositories found</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
