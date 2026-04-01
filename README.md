@@ -15,7 +15,7 @@ A client-side web tool that lists active repositories from GitHub Organization t
 
 ## Screenshot
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](docs/screenshot.svg)
 
 ## Getting Started
 
