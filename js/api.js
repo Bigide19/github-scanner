@@ -253,12 +253,112 @@
     return allCollabs;
   }
 
+  /**
+   * Execute a GitHub GraphQL query.
+   */
+  async function graphqlQuery(token, query, variables) {
+    var response = await fetch(BASE_URL + '/graphql', {
+      method: 'POST',
+      headers: buildHeaders(token),
+      body: JSON.stringify({ query: query, variables: variables || {} })
+    });
+    if (!response.ok) await handleError(response);
+    var result = await response.json();
+    if (result.errors && result.errors.length > 0) {
+      throw new Error(result.errors[0].message);
+    }
+    return result.data;
+  }
+
+  var GQL_PERM_MAP = {
+    'ADMIN': 'admin', 'MAINTAIN': 'maintain', 'WRITE': 'push',
+    'TRIAGE': 'triage', 'READ': 'pull'
+  };
+
+  /**
+   * Fetch org repos with direct collaborators via GraphQL.
+   * Returns repos where the given user has direct access.
+   *
+   * @param {string} token
+   * @param {string} org
+   * @param {string} username
+   * @param {Function} onProgress - called with (fetched, total)
+   * @param {Function} shouldAbort - return true to stop
+   * @returns {Promise<Array>}
+   */
+  async function fetchUserDirectRepos(token, org, username, onProgress, shouldAbort) {
+    var QUERY = 'query($org: String!, $cursor: String) {\n'
+      + '  organization(login: $org) {\n'
+      + '    repositories(first: 100, after: $cursor) {\n'
+      + '      totalCount\n'
+      + '      pageInfo { hasNextPage endCursor }\n'
+      + '      nodes {\n'
+      + '        name\n'
+      + '        description\n'
+      + '        primaryLanguage { name }\n'
+      + '        updatedAt\n'
+      + '        createdAt\n'
+      + '        url\n'
+      + '        visibility\n'
+      + '        isArchived\n'
+      + '        stargazerCount\n'
+      + '        collaborators(affiliation: DIRECT, first: 100) {\n'
+      + '          edges { permission node { login } }\n'
+      + '        }\n'
+      + '      }\n'
+      + '    }\n'
+      + '  }\n'
+      + '}';
+
+    var results = [];
+    var cursor = null;
+    var fetched = 0;
+
+    while (true) {
+      if (shouldAbort && shouldAbort()) break;
+      var data = await graphqlQuery(token, QUERY, { org: org, cursor: cursor });
+      var repos = data.organization.repositories;
+      var total = repos.totalCount;
+
+      for (var i = 0; i < repos.nodes.length; i++) {
+        var node = repos.nodes[i];
+        if (!node.collaborators) continue;
+        var edges = node.collaborators.edges;
+        for (var j = 0; j < edges.length; j++) {
+          if (edges[j].node.login.toLowerCase() === username.toLowerCase()) {
+            results.push({
+              name: node.name,
+              description: node.description,
+              language: node.primaryLanguage ? node.primaryLanguage.name : null,
+              updatedAt: node.updatedAt,
+              createdAt: node.createdAt,
+              url: node.url,
+              visibility: (node.visibility || '').toLowerCase(),
+              archived: node.isArchived,
+              stars: node.stargazerCount,
+              permission: GQL_PERM_MAP[edges[j].permission] || 'pull'
+            });
+            break;
+          }
+        }
+      }
+
+      fetched += repos.nodes.length;
+      if (onProgress) onProgress(fetched, total);
+      if (!repos.pageInfo.hasNextPage) break;
+      cursor = repos.pageInfo.endCursor;
+    }
+
+    return results;
+  }
+
   global.GitHubAPI = {
     fetchTeamRepos: fetchTeamRepos,
     fetchOrgTeams: fetchOrgTeams,
     fetchRepoTeams: fetchRepoTeams,
     fetchOrgRepos: fetchOrgRepos,
     fetchRepoDirectCollaborators: fetchRepoDirectCollaborators,
+    fetchUserDirectRepos: fetchUserDirectRepos,
     validateToken: validateToken,
   };
 })(window);

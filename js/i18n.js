@@ -164,9 +164,9 @@
       'table.name': '이름',
       'table.description': '설명',
       'table.language': '언어',
-      'table.updated': '수정일',
+      'table.updated': 'updatedAt',
       'table.created': '생성일',
-      'table.teams': '소속 팀',
+      'table.teams': '소속',
       'table.visibility': '공개 범위',
       'table.archived': '보관 여부',
 

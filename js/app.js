@@ -280,7 +280,7 @@
         }
       }
 
-      // Step 2: Check actual team assignments per repo to detect inheritance
+      // Step 2: Check actual team assignments per repo to detect inheritance (batched)
       var childTeamSlugs = state.selectedTeams.filter(function (slug) {
         var t = state.teams.find(function (x) { return x.slug === slug; });
         return t && t.parent;
@@ -290,18 +290,32 @@
           return r.teams.some(function (t) { return childTeamSlugs.indexOf(t.slug) !== -1; });
         });
         var totalCheck = reposToCheck.length;
-        for (var ri = 0; ri < reposToCheck.length; ri++) {
+        var BATCH = 10;
+        for (var bi = 0; bi < reposToCheck.length; bi += BATCH) {
           if (state.scanAborted) { showToast(I18n.t('status.cancelled')); break; }
-          els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: ri + 1, total: totalCheck });
-          var repo = reposToCheck[ri];
-          try {
-            var directTeams = await GitHubAPI.fetchRepoTeams(token, org, repo.name);
-            var directSlugs = {};
-            for (var di = 0; di < directTeams.length; di++) {
-              directSlugs[directTeams[di].slug] = directTeams[di].permission;
+          var batchRepos = reposToCheck.slice(bi, bi + BATCH);
+          var batchResults = await Promise.all(batchRepos.map(function (repo) {
+            return GitHubAPI.fetchRepoTeams(token, org, repo.name)
+              .then(function (teams) { return { repo: repo, teams: teams }; })
+              .catch(function (err) { return { repo: repo, error: err }; });
+          }));
+
+          var rateLimited = false;
+          for (var br = 0; br < batchResults.length; br++) {
+            var item = batchResults[br];
+            if (item.error) {
+              if (item.error.message && item.error.message.indexOf('Rate limited') !== -1) {
+                showError(item.error.message);
+                rateLimited = true;
+              }
+              continue;
             }
-            for (var ti = 0; ti < repo.teams.length; ti++) {
-              var entry = repo.teams[ti];
+            var directSlugs = {};
+            for (var di = 0; di < item.teams.length; di++) {
+              directSlugs[item.teams[di].slug] = item.teams[di].permission;
+            }
+            for (var ti = 0; ti < item.repo.teams.length; ti++) {
+              var entry = item.repo.teams[ti];
               if (childTeamSlugs.indexOf(entry.slug) !== -1) {
                 if (!directSlugs[entry.slug]) {
                   entry.inherited = true;
@@ -313,10 +327,11 @@
                 }
               }
             }
-            repo.permission = highestPermission(repo.teams);
-          } catch (e) {
-            if (e.message && e.message.indexOf('Rate limited') !== -1) { showError(e.message); break; }
+            item.repo.permission = highestPermission(item.repo.teams);
           }
+
+          els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: Math.min(bi + BATCH, totalCheck), total: totalCheck });
+          if (rateLimited) break;
         }
       }
       state.allRepos = allRepos;
@@ -332,7 +347,7 @@
     }
   }
 
-  // ── User Scan ──────────────────────────────────────────
+  // ── User Scan (GraphQL) ─────────────────────────────────
   async function handleUserScan() {
     var token = els.pat.value.trim();
     var org = els.org.value.trim();
@@ -345,53 +360,26 @@
     els.results.classList.add('hidden');
 
     try {
-      var orgRepos = await GitHubAPI.fetchOrgRepos(token, org);
-      var total = orgRepos.length;
-      var results = [];
+      var repos = await GitHubAPI.fetchUserDirectRepos(
+        token, org, username,
+        function (fetched, total) {
+          els.loadingText.textContent = I18n.t('status.scanProgress', { current: fetched, total: total });
+        },
+        function () { return state.scanAborted; }
+      );
 
-      var BATCH = 10;
-      for (var bi = 0; bi < orgRepos.length; bi += BATCH) {
-        if (state.scanAborted) { showToast(I18n.t('status.cancelled')); break; }
+      if (state.scanAborted) { showToast(I18n.t('status.cancelled')); }
 
-        var batch = orgRepos.slice(bi, bi + BATCH);
-        var batchResults = await Promise.all(batch.map(function (repo) {
-          return GitHubAPI.fetchRepoDirectCollaborators(token, org, repo.name)
-            .then(function (collabs) { return { repo: repo, collabs: collabs }; })
-            .catch(function (err) { return { repo: repo, error: err }; });
-        }));
-
-        var rateLimited = false;
-        for (var br = 0; br < batchResults.length; br++) {
-          var item = batchResults[br];
-          if (item.error) {
-            if (item.error.message && item.error.message.indexOf('Rate limited') !== -1) {
-              showError(item.error.message);
-              rateLimited = true;
-              break;
-            }
-            continue;
-          }
-          var userCollab = item.collabs.find(function (c) {
-            return c.login.toLowerCase() === username.toLowerCase();
-          });
-          if (userCollab) {
-            var repo = item.repo;
-            repo.permission = userCollab.permission;
-            repo.teams = [{ name: I18n.t('status.userDirect'), slug: '_direct_', permission: userCollab.permission, inherited: false }];
-            results.push(repo);
-          }
-        }
-
-        els.loadingText.textContent = I18n.t('status.scanProgress', { current: Math.min(bi + BATCH, total), total: total });
-        if (rateLimited) break;
+      for (var i = 0; i < repos.length; i++) {
+        repos[i].teams = [{ name: I18n.t('status.userDirect'), slug: '_direct_', permission: repos[i].permission, inherited: false }];
       }
 
-      state.allRepos = results;
+      state.allRepos = repos;
       sessionStorage.setItem('github-scanner-pat', token);
       sessionStorage.setItem('github-scanner-org', org);
       state.page = 1;
       applyFiltersAndSort();
-      if (results.length) els.results.classList.remove('hidden');
+      if (repos.length) els.results.classList.remove('hidden');
     } catch (err) {
       showError(err.message);
     } finally {
