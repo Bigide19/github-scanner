@@ -455,12 +455,10 @@
       if (r.teams && r.teams.length > 0) {
         for (var ti = 0; ti < r.teams.length; ti++) {
           var teamEntry = r.teams[ti];
-          if (teamEntry.inherited) {
-            var inheritLabel = teamEntry.parentTeam ? escHtml(teamEntry.parentTeam) : escHtml(teamEntry.name);
-            var inheritTooltip = I18n.t('team.inheritedFrom', { parent: teamEntry.parentTeam || '' });
-            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(inheritTooltip) + '">' + inheritLabel + '</span>';
-          } else {
+          if (!teamEntry.inherited) {
             teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(teamEntry.name) + '</span>';
+          } else if (state.filters.includeInherited) {
+            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(I18n.t('team.inheritedFrom', { parent: teamEntry.parentTeam || '' })) + '">' + escHtml(teamEntry.parentTeam || teamEntry.name) + '</span>';
           }
         }
       }
