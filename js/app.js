@@ -13,7 +13,8 @@
     filters: { archived: false, visibility: 'all', permissions: [], includeInherited: false },
     page: 1,
     pageSize: 30,
-    loading: false
+    loading: false,
+    scanAborted: false
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -60,7 +61,9 @@
       patIconHide: $('pat-icon-hide'),
       filterInherited: $('filter-inherited'),
       username: $('input-username'),
-      btnScanUser: $('btn-scan-user')
+      btnScanUser: $('btn-scan-user'),
+      btnCancel: $('btn-cancel-scan'),
+      loadingText: $('loading-text')
     };
   }
 
@@ -259,6 +262,7 @@
 
       // Step 1: Collect repos from selected teams
       for (var i = 0; i < state.selectedTeams.length; i++) {
+        if (state.scanAborted) { showToast(I18n.t('status.cancelled')); break; }
         var teamSlug = state.selectedTeams[i];
         var team = state.teams.find(function (t) { return t.slug === teamSlug; });
         var teamName = team ? team.name : teamSlug;
@@ -282,10 +286,14 @@
         return t && t.parent;
       });
       if (childTeamSlugs.length > 0) {
-        for (var ri = 0; ri < allRepos.length; ri++) {
-          var repo = allRepos[ri];
-          var needsCheck = repo.teams.some(function (t) { return childTeamSlugs.indexOf(t.slug) !== -1; });
-          if (!needsCheck) continue;
+        var reposToCheck = allRepos.filter(function (r) {
+          return r.teams.some(function (t) { return childTeamSlugs.indexOf(t.slug) !== -1; });
+        });
+        var totalCheck = reposToCheck.length;
+        for (var ri = 0; ri < reposToCheck.length; ri++) {
+          if (state.scanAborted) { showToast(I18n.t('status.cancelled')); break; }
+          els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: ri + 1, total: totalCheck });
+          var repo = reposToCheck[ri];
           try {
             var directTeams = await GitHubAPI.fetchRepoTeams(token, org, repo.name);
             var directSlugs = {};
@@ -296,12 +304,10 @@
               var entry = repo.teams[ti];
               if (childTeamSlugs.indexOf(entry.slug) !== -1) {
                 if (!directSlugs[entry.slug]) {
-                  // Team not directly assigned → inherited
                   entry.inherited = true;
                   var parentTeam = state.teams.find(function (x) { return x.slug === entry.slug; });
                   entry.parentTeam = parentTeam && parentTeam.parent ? parentTeam.parent.name : null;
                 } else {
-                  // Directly assigned → use actual permission from repo teams API
                   entry.permission = directSlugs[entry.slug];
                   entry.inherited = false;
                 }
@@ -309,7 +315,7 @@
             }
             repo.permission = highestPermission(repo.teams);
           } catch (e) {
-            // If repo teams fetch fails, keep as-is
+            if (e.message && e.message.indexOf('Rate limited') !== -1) { showError(e.message); break; }
           }
         }
       }
@@ -318,7 +324,7 @@
       sessionStorage.setItem('github-scanner-org', org);
       state.page = 1;
       applyFiltersAndSort();
-      els.results.classList.remove('hidden');
+      if (allRepos.length) els.results.classList.remove('hidden');
     } catch (err) {
       showError(err.message);
     } finally {
@@ -337,20 +343,16 @@
     setLoading(true);
     hideError();
     els.results.classList.add('hidden');
-    els.btnScanUser.disabled = true;
 
     try {
-      // Step 1: Fetch all org repos
-      var loadingText = $('loading-text');
-      loadingText.textContent = I18n.t('status.loading');
       var orgRepos = await GitHubAPI.fetchOrgRepos(token, org);
       var total = orgRepos.length;
       var results = [];
-      var checked = 0;
 
-      // Step 2: Check each repo for direct collaborator in batches
       var BATCH = 10;
       for (var bi = 0; bi < orgRepos.length; bi += BATCH) {
+        if (state.scanAborted) { showToast(I18n.t('status.cancelled')); break; }
+
         var batch = orgRepos.slice(bi, bi + BATCH);
         var batchResults = await Promise.all(batch.map(function (repo) {
           return GitHubAPI.fetchRepoDirectCollaborators(token, org, repo.name)
@@ -358,12 +360,13 @@
             .catch(function (err) { return { repo: repo, error: err }; });
         }));
 
+        var rateLimited = false;
         for (var br = 0; br < batchResults.length; br++) {
           var item = batchResults[br];
           if (item.error) {
-            // Rate limit or other error — stop and show partial results
             if (item.error.message && item.error.message.indexOf('Rate limited') !== -1) {
               showError(item.error.message);
+              rateLimited = true;
               break;
             }
             continue;
@@ -379,13 +382,8 @@
           }
         }
 
-        checked = Math.min(bi + BATCH, total);
-        loadingText.textContent = I18n.t('status.scanProgress', { current: checked, total: total });
-
-        // Stop if rate limited
-        if (batchResults.some(function (r) { return r.error && r.error.message && r.error.message.indexOf('Rate limited') !== -1; })) {
-          break;
-        }
+        els.loadingText.textContent = I18n.t('status.scanProgress', { current: Math.min(bi + BATCH, total), total: total });
+        if (rateLimited) break;
       }
 
       state.allRepos = results;
@@ -393,19 +391,22 @@
       sessionStorage.setItem('github-scanner-org', org);
       state.page = 1;
       applyFiltersAndSort();
-      els.results.classList.remove('hidden');
+      if (results.length) els.results.classList.remove('hidden');
     } catch (err) {
       showError(err.message);
     } finally {
       setLoading(false);
-      els.btnScanUser.disabled = false;
     }
   }
 
   function setLoading(on) {
     state.loading = on;
+    state.scanAborted = false;
     els.loading.classList.toggle('hidden', !on);
     els.btnScan.disabled = on;
+    els.btnScanUser.disabled = on;
+    els.btnLoadTeams.disabled = on;
+    els.loadingText.textContent = I18n.t('status.loading');
   }
 
   function showError(msg) {
@@ -663,6 +664,7 @@
 
     els.btnLoadTeams.addEventListener('click', loadTeams);
     els.btnScanUser.addEventListener('click', handleUserScan);
+    els.btnCancel.addEventListener('click', function () { state.scanAborted = true; });
     els.teamSelectBtn.addEventListener('click', toggleTeamDropdown);
     els.teamSelectAll.addEventListener('click', function () { selectAllTeams(true); });
     els.teamDeselectAll.addEventListener('click', function () { selectAllTeams(false); });

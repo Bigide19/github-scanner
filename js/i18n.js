@@ -39,12 +39,15 @@
 
       // User scan
       'label.username': 'Username',
-      'button.scanUser': 'Scan User',
       'status.scanProgress': 'Checking repos... ({current}/{total})',
+      'status.scanTeamProgress': 'Checking team assignments... ({current}/{total})',
       'status.userDirect': 'Direct',
+      'status.cancelled': 'Scan cancelled',
 
       // Buttons
       'button.scan': 'Scan',
+      'button.scanUser': 'Scan User',
+      'button.cancel': 'Cancel',
       'button.copyMarkdown': 'Copy Markdown',
       'button.downloadCsv': 'Download CSV',
 
@@ -145,12 +148,15 @@
 
       // User scan
       'label.username': '사용자명',
-      'button.scanUser': '사용자 스캔',
       'status.scanProgress': '레포 확인 중... ({current}/{total})',
+      'status.scanTeamProgress': '팀 할당 확인 중... ({current}/{total})',
       'status.userDirect': '직접 권한',
+      'status.cancelled': '스캔이 취소되었습니다',
 
       // Buttons
       'button.scan': '스캔',
+      'button.scanUser': '사용자 스캔',
+      'button.cancel': '취소',
       'button.copyMarkdown': '마크다운 복사',
       'button.downloadCsv': 'CSV 다운로드',
 
