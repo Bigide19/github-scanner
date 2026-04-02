@@ -37,6 +37,12 @@
       'pat.security.openSource': 'The source code is publicly available — you can verify this yourself.',
       'pat.security.fineGrained': 'We recommend using a fine-grained PAT with read-only access, scoped to your organization only.',
 
+      // User scan
+      'label.username': 'Username',
+      'button.scanUser': 'Scan User',
+      'status.scanProgress': 'Checking repos... ({current}/{total})',
+      'status.userDirect': 'Direct',
+
       // Buttons
       'button.scan': 'Scan',
       'button.copyMarkdown': 'Copy Markdown',
@@ -136,6 +142,12 @@
       'pat.security.sessionOnly': '토큰은 sessionStorage에 저장되며, 탭을 닫으면 자동으로 삭제됩니다.',
       'pat.security.openSource': '소스 코드가 공개되어 있으므로 직접 확인할 수 있습니다.',
       'pat.security.fineGrained': 'Fine-grained PAT을 사용하여 read-only 권한으로, 해당 조직에만 범위를 제한하는 것을 권장합니다.',
+
+      // User scan
+      'label.username': '사용자명',
+      'button.scanUser': '사용자 스캔',
+      'status.scanProgress': '레포 확인 중... ({current}/{total})',
+      'status.userDirect': '직접 권한',
 
       // Buttons
       'button.scan': '스캔',

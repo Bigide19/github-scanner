@@ -58,7 +58,9 @@
       patToggleBtn: $('pat-toggle-btn'),
       patIconShow: $('pat-icon-show'),
       patIconHide: $('pat-icon-hide'),
-      filterInherited: $('filter-inherited')
+      filterInherited: $('filter-inherited'),
+      username: $('input-username'),
+      btnScanUser: $('btn-scan-user')
     };
   }
 
@@ -324,6 +326,82 @@
     }
   }
 
+  // ── User Scan ──────────────────────────────────────────
+  async function handleUserScan() {
+    var token = els.pat.value.trim();
+    var org = els.org.value.trim();
+    var username = els.username.value.trim();
+
+    if (!token || !org || !username) return;
+
+    setLoading(true);
+    hideError();
+    els.results.classList.add('hidden');
+    els.btnScanUser.disabled = true;
+
+    try {
+      // Step 1: Fetch all org repos
+      var loadingText = $('loading-text');
+      loadingText.textContent = I18n.t('status.loading');
+      var orgRepos = await GitHubAPI.fetchOrgRepos(token, org);
+      var total = orgRepos.length;
+      var results = [];
+      var checked = 0;
+
+      // Step 2: Check each repo for direct collaborator in batches
+      var BATCH = 10;
+      for (var bi = 0; bi < orgRepos.length; bi += BATCH) {
+        var batch = orgRepos.slice(bi, bi + BATCH);
+        var batchResults = await Promise.all(batch.map(function (repo) {
+          return GitHubAPI.fetchRepoDirectCollaborators(token, org, repo.name)
+            .then(function (collabs) { return { repo: repo, collabs: collabs }; })
+            .catch(function (err) { return { repo: repo, error: err }; });
+        }));
+
+        for (var br = 0; br < batchResults.length; br++) {
+          var item = batchResults[br];
+          if (item.error) {
+            // Rate limit or other error — stop and show partial results
+            if (item.error.message && item.error.message.indexOf('Rate limited') !== -1) {
+              showError(item.error.message);
+              break;
+            }
+            continue;
+          }
+          var userCollab = item.collabs.find(function (c) {
+            return c.login.toLowerCase() === username.toLowerCase();
+          });
+          if (userCollab) {
+            var repo = item.repo;
+            repo.permission = userCollab.permission;
+            repo.teams = [{ name: I18n.t('status.userDirect'), slug: '_direct_', permission: userCollab.permission, inherited: false }];
+            results.push(repo);
+          }
+        }
+
+        checked = Math.min(bi + BATCH, total);
+        loadingText.textContent = I18n.t('status.scanProgress', { current: checked, total: total });
+
+        // Stop if rate limited
+        if (batchResults.some(function (r) { return r.error && r.error.message && r.error.message.indexOf('Rate limited') !== -1; })) {
+          break;
+        }
+      }
+
+      state.allRepos = results;
+      sessionStorage.setItem('github-scanner-pat', token);
+      sessionStorage.setItem('github-scanner-org', org);
+      state.page = 1;
+      applyFiltersAndSort();
+      els.results.classList.remove('hidden');
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+      els.btnScanUser.disabled = false;
+    }
+  }
+
   function setLoading(on) {
     state.loading = on;
     els.loading.classList.toggle('hidden', !on);
@@ -584,6 +662,7 @@
     });
 
     els.btnLoadTeams.addEventListener('click', loadTeams);
+    els.btnScanUser.addEventListener('click', handleUserScan);
     els.teamSelectBtn.addEventListener('click', toggleTeamDropdown);
     els.teamSelectAll.addEventListener('click', function () { selectAllTeams(true); });
     els.teamDeselectAll.addEventListener('click', function () { selectAllTeams(false); });

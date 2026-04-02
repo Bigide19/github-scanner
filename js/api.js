@@ -207,10 +207,58 @@
     return allTeams;
   }
 
+  /**
+   * Fetch all repositories in an organization (paginated).
+   */
+  async function fetchOrgRepos(token, org) {
+    var allRepos = [];
+    var page = 1;
+    var perPage = 100;
+    while (true) {
+      var url = BASE_URL + "/orgs/" + encodeURIComponent(org) + "/repos?per_page=" + perPage + "&page=" + page + "&type=all";
+      var response = await fetch(url, { headers: buildHeaders(token) });
+      if (!response.ok) await handleError(response);
+      var repos = await response.json();
+      for (var i = 0; i < repos.length; i++) {
+        allRepos.push(mapRepo(repos[i]));
+      }
+      if (repos.length < perPage) break;
+      page++;
+    }
+    return allRepos;
+  }
+
+  /**
+   * Fetch direct collaborators for a repository.
+   * Returns only users with direct (personal) access, not through teams.
+   */
+  async function fetchRepoDirectCollaborators(token, org, repoName) {
+    var allCollabs = [];
+    var page = 1;
+    var perPage = 100;
+    while (true) {
+      var url = BASE_URL + "/repos/" + encodeURIComponent(org) + "/" + encodeURIComponent(repoName) + "/collaborators?affiliation=direct&per_page=" + perPage + "&page=" + page;
+      var response = await fetch(url, { headers: buildHeaders(token) });
+      if (!response.ok) await handleError(response);
+      var collabs = await response.json();
+      for (var i = 0; i < collabs.length; i++) {
+        allCollabs.push({
+          login: collabs[i].login,
+          permission: derivePermission(collabs[i].permissions)
+        });
+      }
+      if (collabs.length < perPage) break;
+      page++;
+    }
+    return allCollabs;
+  }
+
   global.GitHubAPI = {
     fetchTeamRepos: fetchTeamRepos,
     fetchOrgTeams: fetchOrgTeams,
     fetchRepoTeams: fetchRepoTeams,
+    fetchOrgRepos: fetchOrgRepos,
+    fetchRepoDirectCollaborators: fetchRepoDirectCollaborators,
     validateToken: validateToken,
   };
 })(window);
