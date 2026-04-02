@@ -566,6 +566,8 @@
         var vt = visibleTeams[ti2];
         if (vt.inherited) {
           teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(I18n.t('team.inheritedFrom', { parent: vt.parentTeam || '' })) + '">' + escHtml(vt.parentTeam || vt.name) + '</span>';
+        } else if (vt.slug && vt.slug.indexOf('_user_') === 0) {
+          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">' + escHtml(vt.name) + '</span>';
         } else {
           teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(vt.name) + '</span>';
         }
