@@ -19,17 +19,29 @@ A client-side web tool that lists active repositories from GitHub Organization t
 
 ## Getting Started
 
-No build step required. Open `index.html` directly in a browser, or serve with any static file server:
+No build step required. Clone and run locally:
 
 ```bash
+git clone https://github.com/Bigide19/github-scanner.git
+cd github-scanner
+```
+
+Then serve with any static file server:
+
+```bash
+# Using Node.js
 npx serve .
-```
 
-```bash
+# Using Python
 python3 -m http.server
+
+# Using PHP
+php -S localhost:8000
 ```
 
-Alternatively, deploy to GitHub Pages.
+Open `http://localhost:3000` (serve) or `http://localhost:8000` (python/php) in your browser.
+
+Or just visit the live version at **https://bigide19.github.io/github-scanner/**
 
 ## Usage
 
