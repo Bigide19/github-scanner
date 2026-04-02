@@ -191,15 +191,15 @@
       </div>
 
       <!-- Table -->
-      <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <table class="repo-table w-full text-sm table-fixed">
+      <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-x-auto">
+        <table class="repo-table w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
             <tr>
-              <th class="sortable px-5 py-3 text-left w-[25%]" data-sort="name" data-i18n="table.name">Name</th>
-              <th class="px-5 py-3 text-left w-[25%]" data-i18n="table.description">Description</th>
-              <th class="px-5 py-3 text-left w-[20%]" data-i18n="table.teams">Teams</th>
-              <th class="sortable px-5 py-3 text-left w-[15%]" data-sort="updatedAt" data-i18n="table.updated">Updated</th>
-              <th class="sortable px-5 py-3 text-center w-[15%]" data-sort="permission">Permission</th>
+              <th class="sortable px-4 py-3 text-left whitespace-nowrap" data-sort="name" data-i18n="table.name">Name</th>
+              <th class="px-4 py-3 text-left" data-i18n="table.description">Description</th>
+              <th class="px-4 py-3 text-left whitespace-nowrap" data-i18n="table.teams">Teams</th>
+              <th class="sortable px-4 py-3 text-left whitespace-nowrap" data-sort="updatedAt" data-i18n="table.updated">Updated</th>
+              <th class="sortable px-4 py-3 text-center whitespace-nowrap" data-sort="permission">Permission</th>
             </tr>
           </thead>
           <tbody id="repo-tbody" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>

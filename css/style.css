@@ -161,17 +161,10 @@ body {
   opacity: 1;
 }
 
-/* --- PAT input password dots --- */
+/* --- PAT input --- */
 
 input.pat-input {
-  -webkit-text-security: disc;
   font-family: monospace;
-  letter-spacing: 0.15em;
-}
-
-input.pat-input:focus {
-  -webkit-text-security: none;
-  letter-spacing: normal;
 }
 
 /* --- Visibility & status badges --- */

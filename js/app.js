@@ -420,7 +420,7 @@
       var teamsHtml = '';
       if (r.teams && r.teams.length > 0) {
         for (var ti = 0; ti < r.teams.length; ti++) {
-          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 whitespace-nowrap">' + escHtml(r.teams[ti].name) + '</span>';
+          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(r.teams[ti].name) + '</span>';
         }
       }
 
@@ -446,23 +446,23 @@
 
       html += '<tr class="' + rowBg + '">'
         // Name with visibility icon
-        + '<td class="px-5 py-3">'
-          + '<div class="flex items-center gap-2">'
+        + '<td class="px-4 py-3">'
+          + '<div class="flex items-center gap-1.5 min-w-0">'
             + visIcon
             + '<a href="' + escHtml(r.url) + '" target="_blank" rel="noopener" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate">' + escHtml(r.name) + '</a>'
             + (r.archived ? '<span class="badge badge-archived text-[10px] flex-shrink-0">archived</span>' : '')
           + '</div>'
         + '</td>'
         // Description
-        + '<td class="px-5 py-3 text-gray-500 dark:text-gray-400">'
+        + '<td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-[200px]">'
           + '<span class="block truncate" title="' + escHtml(r.description || '') + '">' + escHtml(r.description || '—') + '</span>'
         + '</td>'
         // Teams
-        + '<td class="px-5 py-3"><div class="flex flex-wrap gap-1">' + teamsHtml + '</div></td>'
+        + '<td class="px-4 py-3"><div class="flex flex-wrap gap-1">' + teamsHtml + '</div></td>'
         // Updated
-        + '<td class="px-5 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">' + I18n.formatDate(r.updatedAt) + '</td>'
+        + '<td class="px-4 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">' + I18n.formatDate(r.updatedAt) + '</td>'
         // Permission
-        + '<td class="px-5 py-3 text-center"><div class="flex flex-wrap justify-center gap-1">' + permHtml + '</div></td>'
+        + '<td class="px-4 py-3 text-center"><div class="flex flex-wrap justify-center gap-1">' + permHtml + '</div></td>'
         + '</tr>';
     }
     els.tbody.innerHTML = html;
