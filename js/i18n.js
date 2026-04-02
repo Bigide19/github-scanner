@@ -67,6 +67,7 @@
       'team.deselectAll': 'Deselect All',
       'team.selected': '{count} team(s) selected',
       'team.inherited': 'Inherited from parent team',
+      'team.inheritedFrom': 'Inherited from {parent}',
 
       // Filters
       'filter.showArchived': 'Show Archived',
@@ -159,6 +160,7 @@
       'team.deselectAll': '전체 해제',
       'team.selected': '{count}개 팀 선택됨',
       'team.inherited': '상위 팀에서 상속됨',
+      'team.inheritedFrom': '{parent}에서 상속됨',
 
       // Filters
       'filter.showArchived': '보관된 항목 표시',

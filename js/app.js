@@ -265,10 +265,12 @@
 
         // Detect inherited repos by checking parent team
         var parentRepoUrls = null;
+        var parentName = null;
         try {
           var details = await GitHubAPI.fetchTeamDetails(token, org, teamSlug);
           if (details.parent) {
             var parentSlug = details.parent.slug;
+            parentName = details.parent.name;
             if (parentRepoCache[parentSlug] === undefined) {
               var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
               parentRepoCache[parentSlug] = {};
@@ -286,11 +288,11 @@
           var key = repos[j].url;
           var inherited = parentRepoUrls ? !!parentRepoUrls[key] : false;
           if (!seen[key]) {
-            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited }];
+            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited, parentTeam: inherited ? parentName : null }];
             seen[key] = repos[j];
             allRepos.push(repos[j]);
           } else {
-            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited });
+            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited, parentTeam: inherited ? parentName : null });
             seen[key].permission = highestPermission(seen[key].teams);
           }
         }
@@ -454,7 +456,9 @@
         for (var ti = 0; ti < r.teams.length; ti++) {
           var teamEntry = r.teams[ti];
           if (teamEntry.inherited) {
-            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + I18n.t('team.inherited') + '">' + escHtml(teamEntry.name) + '</span>';
+            var inheritLabel = teamEntry.parentTeam ? escHtml(teamEntry.parentTeam) : escHtml(teamEntry.name);
+            var inheritTooltip = I18n.t('team.inheritedFrom', { parent: teamEntry.parentTeam || '' });
+            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(inheritTooltip) + '">' + inheritLabel + '</span>';
           } else {
             teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(teamEntry.name) + '</span>';
           }
