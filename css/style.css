@@ -133,6 +133,25 @@ body {
   }
 }
 
+/* --- Progress bar indeterminate shimmer --- */
+
+.progress-bar-fill.indeterminate {
+  width: 100% !important;
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.2) 0%,
+    rgba(99, 102, 241, 0.8) 50%,
+    rgba(99, 102, 241, 0.2) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* --- Table row hover highlight --- */
 
 .repo-table tbody tr {

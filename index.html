@@ -99,62 +99,53 @@
           </div>
         </div>
 
-        <!-- Team scan -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div class="md:col-span-10 relative">
-            <label class="block text-sm font-medium mb-1" data-i18n="label.team">Team</label>
-            <div id="team-select-wrapper" class="relative">
-              <button type="button" id="team-select-btn" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-left text-sm flex items-center justify-between disabled:opacity-50" disabled>
-                <span id="team-select-label" class="truncate text-gray-400" data-i18n="team.placeholder">Select teams...</span>
-                <svg class="w-4 h-4 flex-shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-              <div id="team-dropdown" class="hidden absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 flex gap-2">
-                  <button type="button" id="team-select-all" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline" data-i18n="team.selectAll">Select All</button>
-                  <button type="button" id="team-deselect-all" class="text-xs text-gray-500 hover:underline" data-i18n="team.deselectAll">Deselect All</button>
-                </div>
-                <div id="team-list" class="p-1"></div>
-              </div>
-            </div>
-          </div>
-          <div class="md:col-span-2">
-            <button type="submit" id="btn-scan" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span data-i18n="button.scan">Scan</span>
+        <!-- Team selector -->
+        <div>
+          <label class="block text-sm font-medium mb-1" data-i18n="label.team">Team</label>
+          <div id="team-select-wrapper" class="relative">
+            <button type="button" id="team-select-btn" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-left text-sm flex items-center justify-between disabled:opacity-50" disabled>
+              <span id="team-select-label" class="truncate text-gray-400" data-i18n="team.placeholder">Select teams...</span>
+              <svg class="w-4 h-4 flex-shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
             </button>
+            <div id="team-dropdown" class="hidden absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 flex gap-2">
+                <button type="button" id="team-select-all" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline" data-i18n="team.selectAll">Select All</button>
+                <button type="button" id="team-deselect-all" class="text-xs text-gray-500 hover:underline" data-i18n="team.deselectAll">Deselect All</button>
+              </div>
+              <div id="team-list" class="p-1"></div>
+            </div>
           </div>
         </div>
 
         <!-- Selected teams chips -->
         <div id="team-chips" class="flex flex-wrap gap-1.5 empty:hidden"></div>
 
-        <!-- Divider -->
-        <div class="relative flex items-center gap-3 pt-2">
-          <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
-          <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or</span>
-          <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+        <!-- Username -->
+        <div>
+          <label class="block text-sm font-medium mb-1" data-i18n="label.username">Username</label>
+          <input type="text" id="input-username" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="octocat">
         </div>
 
-        <!-- User scan -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div class="md:col-span-10">
-            <label class="block text-sm font-medium mb-1" data-i18n="label.username">Username</label>
-            <input type="text" id="input-username" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="octocat">
-          </div>
-          <div class="md:col-span-2">
-            <button type="button" id="btn-scan-user" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" data-i18n="button.scanUser">Scan User</button>
-          </div>
-        </div>
+        <!-- Scan button -->
+        <button type="submit" id="btn-scan" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span data-i18n="button.scan">Scan</span>
+        </button>
 
       </form>
     </section>
 
     <!-- ── Loading ── -->
-    <div id="loading" class="hidden flex flex-col items-center justify-center gap-3 py-12">
-      <div class="flex items-center gap-3">
-        <div class="spinner text-indigo-500"></div>
-        <span id="loading-text" class="text-gray-500 dark:text-gray-400" data-i18n="status.loading">Loading repositories...</span>
+    <div id="loading" class="hidden mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <span id="loading-text" class="text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="status.loading">Loading repositories...</span>
+          <button type="button" id="btn-cancel-scan" class="text-sm text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" data-i18n="button.cancel">Cancel</button>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+          <div id="progress-bar" class="progress-bar-fill bg-indigo-500 h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+        <div id="progress-detail" class="mt-2 text-xs text-gray-400 dark:text-gray-500 text-right"></div>
       </div>
-      <button type="button" id="btn-cancel-scan" class="mt-2 px-4 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400" data-i18n="button.cancel">Cancel</button>
     </div>
 
     <!-- ── Error ── -->

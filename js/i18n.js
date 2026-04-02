@@ -101,6 +101,7 @@
 
       // Status messages
       'status.loading': 'Loading repositories...',
+      'status.loadingTeams': 'Fetching team repositories...',
       'status.empty': 'No repositories found',
       'status.resultCount': '{count} repositories found',
       'status.copiedToClipboard': 'Copied to clipboard',
@@ -111,6 +112,7 @@
       'error.unauthorized': 'Unauthorized. Please check your Personal Access Token.',
       'error.notFound': 'Not found. Please verify the organization and team slug.',
       'error.noTeamSelected': 'Please select at least one team.',
+      'error.noSelection': 'Please select at least one team or enter a username.',
 
       // Dark mode
       'darkMode.toggle': 'Dark Mode',
@@ -203,6 +205,7 @@
 
       // Status messages
       'status.loading': '저장소 로딩 중...',
+      'status.loadingTeams': '팀 레포지토리 가져오는 중...',
       'status.empty': '저장소를 찾을 수 없습니다',
       'status.resultCount': '{count}개의 저장소를 찾았습니다',
       'status.copiedToClipboard': '클립보드에 복사되었습니다',
@@ -213,6 +216,7 @@
       'error.unauthorized': '인증에 실패했습니다. 개인 액세스 토큰을 확인해 주세요.',
       'error.notFound': '찾을 수 없습니다. 조직명과 팀을 확인해 주세요.',
       'error.noTeamSelected': '팀을 하나 이상 선택해 주세요.',
+      'error.noSelection': '팀을 선택하거나 사용자명을 입력해 주세요.',
 
       // Dark mode
       'darkMode.toggle': '다크 모드',
