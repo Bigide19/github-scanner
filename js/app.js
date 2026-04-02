@@ -426,20 +426,24 @@
 
       // Build permission display
       var permHtml = '';
+      var multiTeam = r.teams && r.teams.length > 1;
       var uniquePerms = {};
-      if (r.teams && r.teams.length > 1) {
+      if (multiTeam) {
         for (var pi = 0; pi < r.teams.length; pi++) { uniquePerms[r.teams[pi].permission] = true; }
       }
       var hasDiffPerms = Object.keys(uniquePerms).length > 1;
 
-      if (hasDiffPerms) {
+      if (multiTeam && hasDiffPerms) {
+        permHtml = '<div class="flex flex-col gap-1">';
         for (var pi2 = 0; pi2 < r.teams.length; pi2++) {
           var tp = r.teams[pi2];
           var tpClass = PERM_COLORS[tp.permission] || PERM_COLORS.pull;
-          permHtml += '<span class="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ' + tpClass + '">'
-            + '<span class="opacity-60">' + escHtml(tp.name) + ':</span> ' + (PERM_LABELS[tp.permission] || tp.permission)
-            + '</span>';
+          permHtml += '<div class="flex items-center justify-between gap-2 text-[10px]">'
+            + '<span class="text-gray-500 dark:text-gray-400 truncate">' + escHtml(tp.name) + '</span>'
+            + '<span class="font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ' + tpClass + '">' + (PERM_LABELS[tp.permission] || tp.permission) + '</span>'
+            + '</div>';
         }
+        permHtml += '</div>';
       } else {
         permHtml = '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ' + permClass + '">' + (PERM_LABELS[r.permission] || r.permission) + '</span>';
       }
@@ -462,7 +466,7 @@
         // Updated
         + '<td class="px-4 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">' + I18n.formatDate(r.updatedAt) + '</td>'
         // Permission
-        + '<td class="px-4 py-3 text-center"><div class="flex flex-wrap justify-center gap-1">' + permHtml + '</div></td>'
+        + '<td class="px-4 py-3' + (multiTeam && hasDiffPerms ? '' : ' text-center') + '">' + permHtml + '</td>'
         + '</tr>';
     }
     els.tbody.innerHTML = html;
