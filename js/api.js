@@ -164,6 +164,7 @@
           slug: teams[i].slug,
           name: teams[i].name,
           description: teams[i].description,
+          parent: teams[i].parent ? { slug: teams[i].parent.slug, name: teams[i].parent.name } : null,
         });
       }
 

@@ -263,25 +263,20 @@
         var teamName = team ? team.name : teamSlug;
         var repos = await GitHubAPI.fetchTeamRepos(token, org, teamSlug);
 
-        // Detect inherited repos by checking parent team
+        // Detect inherited repos using parent info from fetchOrgTeams
         var parentRepoUrls = null;
         var parentName = null;
-        try {
-          var details = await GitHubAPI.fetchTeamDetails(token, org, teamSlug);
-          if (details.parent) {
-            var parentSlug = details.parent.slug;
-            parentName = details.parent.name;
-            if (parentRepoCache[parentSlug] === undefined) {
-              var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
-              parentRepoCache[parentSlug] = {};
-              for (var p = 0; p < parentRepos.length; p++) {
-                parentRepoCache[parentSlug][parentRepos[p].url] = true;
-              }
+        if (team && team.parent) {
+          var parentSlug = team.parent.slug;
+          parentName = team.parent.name;
+          if (parentRepoCache[parentSlug] === undefined) {
+            var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
+            parentRepoCache[parentSlug] = {};
+            for (var p = 0; p < parentRepos.length; p++) {
+              parentRepoCache[parentSlug][parentRepos[p].url] = true;
             }
-            parentRepoUrls = parentRepoCache[parentSlug];
           }
-        } catch (e) {
-          // If team details fail, skip inheritance detection
+          parentRepoUrls = parentRepoCache[parentSlug];
         }
 
         for (var j = 0; j < repos.length; j++) {
