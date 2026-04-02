@@ -264,7 +264,7 @@
         var repos = await GitHubAPI.fetchTeamRepos(token, org, teamSlug);
 
         // Detect inherited repos using parent info from fetchOrgTeams
-        var parentRepoUrls = null;
+        var parentRepoPerms = null;
         var parentName = null;
         if (team && team.parent) {
           var parentSlug = team.parent.slug;
@@ -273,15 +273,22 @@
             var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
             parentRepoCache[parentSlug] = {};
             for (var p = 0; p < parentRepos.length; p++) {
-              parentRepoCache[parentSlug][parentRepos[p].url] = true;
+              parentRepoCache[parentSlug][parentRepos[p].url] = parentRepos[p].permission;
             }
           }
-          parentRepoUrls = parentRepoCache[parentSlug];
+          parentRepoPerms = parentRepoCache[parentSlug];
         }
 
         for (var j = 0; j < repos.length; j++) {
           var key = repos[j].url;
-          var inherited = parentRepoUrls ? !!parentRepoUrls[key] : false;
+          // Inherited = exists in parent AND child permission is not higher than parent
+          var inherited = false;
+          if (parentRepoPerms && parentRepoPerms[key] !== undefined) {
+            var childIdx = PERM_ORDER.indexOf(repos[j].permission);
+            var parentIdx = PERM_ORDER.indexOf(parentRepoPerms[key]);
+            // Lower index = higher permission. If child <= parent level, it's inherited.
+            inherited = childIdx >= parentIdx;
+          }
           if (!seen[key]) {
             repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited, parentTeam: inherited ? parentName : null }];
             seen[key] = repos[j];
