@@ -670,6 +670,20 @@
       els.patIconHide.classList.toggle('hidden', !isPassword);
     });
 
+    $('btn-star').addEventListener('click', function () {
+      var token = els.pat.value.trim();
+      if (!token) { showToast('Enter a PAT first'); return; }
+      fetch('https://api.github.com/user/starred/Bigide19/github-scanner', {
+        method: 'PUT',
+        headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github.v3+json' }
+      }).then(function () {
+        var svg = $('btn-star').querySelector('svg');
+        svg.setAttribute('fill', 'currentColor');
+        svg.classList.remove('text-gray-400');
+        svg.classList.add('text-yellow-500');
+        showToast('Thanks for the star!');
+      }).catch(function () {});
+    });
     els.btnLoadTeams.addEventListener('click', loadTeams);
     els.btnCancel.addEventListener('click', function () { state.scanAborted = true; });
     els.teamSelectBtn.addEventListener('click', toggleTeamDropdown);
