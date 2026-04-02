@@ -176,9 +176,30 @@
     return allTeams;
   }
 
+  /**
+   * Fetch team details including parent team info.
+   *
+   * @param {string} token
+   * @param {string} org
+   * @param {string} teamSlug
+   * @returns {Promise<Object>} { slug, name, parent: { slug, name } | null }
+   */
+  async function fetchTeamDetails(token, org, teamSlug) {
+    var url = BASE_URL + "/orgs/" + encodeURIComponent(org) + "/teams/" + encodeURIComponent(teamSlug);
+    var response = await fetch(url, { headers: buildHeaders(token) });
+    if (!response.ok) await handleError(response);
+    var data = await response.json();
+    return {
+      slug: data.slug,
+      name: data.name,
+      parent: data.parent ? { slug: data.parent.slug, name: data.parent.name } : null
+    };
+  }
+
   global.GitHubAPI = {
     fetchTeamRepos: fetchTeamRepos,
     fetchOrgTeams: fetchOrgTeams,
+    fetchTeamDetails: fetchTeamDetails,
     validateToken: validateToken,
   };
 })(window);

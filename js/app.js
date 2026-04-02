@@ -10,7 +10,7 @@
     teams: [],
     selectedTeams: [],
     sort: { key: 'updatedAt', dir: 'desc' },
-    filters: { archived: false, visibility: 'all', permissions: [] },
+    filters: { archived: false, visibility: 'all', permissions: [], includeInherited: false },
     page: 1,
     pageSize: 30,
     loading: false
@@ -57,7 +57,8 @@
       patHelpPanel: $('pat-help-panel'),
       patToggleBtn: $('pat-toggle-btn'),
       patIconShow: $('pat-icon-show'),
-      patIconHide: $('pat-icon-hide')
+      patIconHide: $('pat-icon-hide'),
+      filterInherited: $('filter-inherited')
     };
   }
 
@@ -253,19 +254,43 @@
     try {
       var seen = {};
       var allRepos = [];
+      // Cache parent repo URLs to avoid duplicate fetches
+      var parentRepoCache = {};
+
       for (var i = 0; i < state.selectedTeams.length; i++) {
         var teamSlug = state.selectedTeams[i];
         var team = state.teams.find(function (t) { return t.slug === teamSlug; });
         var teamName = team ? team.name : teamSlug;
         var repos = await GitHubAPI.fetchTeamRepos(token, org, teamSlug);
+
+        // Detect inherited repos by checking parent team
+        var parentRepoUrls = null;
+        try {
+          var details = await GitHubAPI.fetchTeamDetails(token, org, teamSlug);
+          if (details.parent) {
+            var parentSlug = details.parent.slug;
+            if (parentRepoCache[parentSlug] === undefined) {
+              var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
+              parentRepoCache[parentSlug] = {};
+              for (var p = 0; p < parentRepos.length; p++) {
+                parentRepoCache[parentSlug][parentRepos[p].url] = true;
+              }
+            }
+            parentRepoUrls = parentRepoCache[parentSlug];
+          }
+        } catch (e) {
+          // If team details fail, skip inheritance detection
+        }
+
         for (var j = 0; j < repos.length; j++) {
           var key = repos[j].url;
+          var inherited = parentRepoUrls ? !!parentRepoUrls[key] : false;
           if (!seen[key]) {
-            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission }];
+            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited }];
             seen[key] = repos[j];
             allRepos.push(repos[j]);
           } else {
-            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission });
+            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited });
             seen[key].permission = highestPermission(seen[key].teams);
           }
         }
@@ -313,6 +338,13 @@
     if (state.filters.permissions.length > 0) {
       repos = repos.filter(function (r) {
         return state.filters.permissions.indexOf(r.permission) !== -1;
+      });
+    }
+    if (!state.filters.includeInherited) {
+      repos = repos.filter(function (r) {
+        if (!r.teams) return true;
+        // Keep repo if at least one team association is direct (not inherited)
+        return r.teams.some(function (t) { return !t.inherited; });
       });
     }
 
@@ -420,7 +452,12 @@
       var teamsHtml = '';
       if (r.teams && r.teams.length > 0) {
         for (var ti = 0; ti < r.teams.length; ti++) {
-          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(r.teams[ti].name) + '</span>';
+          var teamEntry = r.teams[ti];
+          if (teamEntry.inherited) {
+            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + I18n.t('team.inherited') + '">' + escHtml(teamEntry.name) + '</span>';
+          } else {
+            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(teamEntry.name) + '</span>';
+          }
         }
       }
 
@@ -525,6 +562,11 @@
 
     els.filterArchived.addEventListener('change', function () {
       state.filters.archived = this.checked;
+      state.page = 1;
+      applyFiltersAndSort();
+    });
+    els.filterInherited.addEventListener('change', function () {
+      state.filters.includeInherited = this.checked;
       state.page = 1;
       applyFiltersAndSort();
     });

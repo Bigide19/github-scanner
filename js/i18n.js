@@ -66,9 +66,11 @@
       'team.selectAll': 'Select All',
       'team.deselectAll': 'Deselect All',
       'team.selected': '{count} team(s) selected',
+      'team.inherited': 'Inherited from parent team',
 
       // Filters
       'filter.showArchived': 'Show Archived',
+      'filter.includeInherited': 'Include inherited repos',
       'filter.visibility': 'Visibility',
       'filter.visibility.all': 'All',
       'filter.visibility.public': 'Public',
@@ -156,9 +158,11 @@
       'team.selectAll': '전체 선택',
       'team.deselectAll': '전체 해제',
       'team.selected': '{count}개 팀 선택됨',
+      'team.inherited': '상위 팀에서 상속됨',
 
       // Filters
       'filter.showArchived': '보관된 항목 표시',
+      'filter.includeInherited': '상속된 레포 포함',
       'filter.visibility': '공개 범위',
       'filter.visibility.all': 'All',
       'filter.visibility.public': 'Public',
