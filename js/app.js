@@ -445,41 +445,53 @@
       var permClass = PERM_COLORS[r.permission] || PERM_COLORS.pull;
       var visIcon = VISIBILITY_ICON[r.visibility] || VISIBILITY_ICON['public'];
 
-      // Build teams badges
-      var teamsHtml = '';
+      // Compute visible teams (respect inherited filter)
+      var visibleTeams = [];
       if (r.teams && r.teams.length > 0) {
         for (var ti = 0; ti < r.teams.length; ti++) {
           var teamEntry = r.teams[ti];
-          if (!teamEntry.inherited) {
-            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(teamEntry.name) + '</span>';
-          } else if (state.filters.includeInherited) {
-            teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(I18n.t('team.inheritedFrom', { parent: teamEntry.parentTeam || '' })) + '">' + escHtml(teamEntry.parentTeam || teamEntry.name) + '</span>';
+          if (!teamEntry.inherited || state.filters.includeInherited) {
+            visibleTeams.push(teamEntry);
           }
         }
       }
 
-      // Build permission display
+      // Build teams badges
+      var teamsHtml = '';
+      for (var ti2 = 0; ti2 < visibleTeams.length; ti2++) {
+        var vt = visibleTeams[ti2];
+        if (vt.inherited) {
+          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 italic" title="' + escHtml(I18n.t('team.inheritedFrom', { parent: vt.parentTeam || '' })) + '">' + escHtml(vt.parentTeam || vt.name) + '</span>';
+        } else {
+          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">' + escHtml(vt.name) + '</span>';
+        }
+      }
+
+      // Build permission display based on visible teams
       var permHtml = '';
-      var multiTeam = r.teams && r.teams.length > 1;
+      var multiTeam = visibleTeams.length > 1;
       var uniquePerms = {};
       if (multiTeam) {
-        for (var pi = 0; pi < r.teams.length; pi++) { uniquePerms[r.teams[pi].permission] = true; }
+        for (var pi = 0; pi < visibleTeams.length; pi++) { uniquePerms[visibleTeams[pi].permission] = true; }
       }
       var hasDiffPerms = Object.keys(uniquePerms).length > 1;
 
       if (multiTeam && hasDiffPerms) {
         permHtml = '<div class="flex flex-col gap-1">';
-        for (var pi2 = 0; pi2 < r.teams.length; pi2++) {
-          var tp = r.teams[pi2];
+        for (var pi2 = 0; pi2 < visibleTeams.length; pi2++) {
+          var tp = visibleTeams[pi2];
           var tpClass = PERM_COLORS[tp.permission] || PERM_COLORS.pull;
+          var tpName = tp.inherited ? (tp.parentTeam || tp.name) : tp.name;
           permHtml += '<div class="flex items-center justify-between gap-2 text-[10px]">'
-            + '<span class="text-gray-500 dark:text-gray-400 truncate">' + escHtml(tp.name) + '</span>'
+            + '<span class="text-gray-500 dark:text-gray-400 truncate">' + escHtml(tpName) + '</span>'
             + '<span class="font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ' + tpClass + '">' + (PERM_LABELS[tp.permission] || tp.permission) + '</span>'
             + '</div>';
         }
         permHtml += '</div>';
       } else {
-        permHtml = '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ' + permClass + '">' + (PERM_LABELS[r.permission] || r.permission) + '</span>';
+        var displayPerm = visibleTeams.length > 0 ? visibleTeams[0].permission : r.permission;
+        var dpClass = PERM_COLORS[displayPerm] || PERM_COLORS.pull;
+        permHtml = '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ' + dpClass + '">' + (PERM_LABELS[displayPerm] || displayPerm) + '</span>';
       }
 
       html += '<tr class="' + rowBg + '">'
