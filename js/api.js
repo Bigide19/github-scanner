@@ -178,29 +178,39 @@
   }
 
   /**
-   * Fetch team details including parent team info.
+   * Fetch teams directly assigned to a repository.
    *
    * @param {string} token
    * @param {string} org
-   * @param {string} teamSlug
-   * @returns {Promise<Object>} { slug, name, parent: { slug, name } | null }
+   * @param {string} repoName
+   * @returns {Promise<Array>} Array of { slug, name, permission }
    */
-  async function fetchTeamDetails(token, org, teamSlug) {
-    var url = BASE_URL + "/orgs/" + encodeURIComponent(org) + "/teams/" + encodeURIComponent(teamSlug);
-    var response = await fetch(url, { headers: buildHeaders(token) });
-    if (!response.ok) await handleError(response);
-    var data = await response.json();
-    return {
-      slug: data.slug,
-      name: data.name,
-      parent: data.parent ? { slug: data.parent.slug, name: data.parent.name } : null
-    };
+  async function fetchRepoTeams(token, org, repoName) {
+    var allTeams = [];
+    var page = 1;
+    var perPage = 100;
+    while (true) {
+      var url = BASE_URL + "/repos/" + encodeURIComponent(org) + "/" + encodeURIComponent(repoName) + "/teams?per_page=" + perPage + "&page=" + page;
+      var response = await fetch(url, { headers: buildHeaders(token) });
+      if (!response.ok) await handleError(response);
+      var teams = await response.json();
+      for (var i = 0; i < teams.length; i++) {
+        allTeams.push({
+          slug: teams[i].slug,
+          name: teams[i].name,
+          permission: teams[i].permission
+        });
+      }
+      if (teams.length < perPage) break;
+      page++;
+    }
+    return allTeams;
   }
 
   global.GitHubAPI = {
     fetchTeamRepos: fetchTeamRepos,
     fetchOrgTeams: fetchOrgTeams,
-    fetchTeamDetails: fetchTeamDetails,
+    fetchRepoTeams: fetchRepoTeams,
     validateToken: validateToken,
   };
 })(window);

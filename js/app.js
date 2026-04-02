@@ -254,48 +254,60 @@
     try {
       var seen = {};
       var allRepos = [];
-      // Cache parent repo URLs to avoid duplicate fetches
-      var parentRepoCache = {};
 
+      // Step 1: Collect repos from selected teams
       for (var i = 0; i < state.selectedTeams.length; i++) {
         var teamSlug = state.selectedTeams[i];
         var team = state.teams.find(function (t) { return t.slug === teamSlug; });
         var teamName = team ? team.name : teamSlug;
         var repos = await GitHubAPI.fetchTeamRepos(token, org, teamSlug);
-
-        // Detect inherited repos using parent info from fetchOrgTeams
-        var parentRepoPerms = null;
-        var parentName = null;
-        if (team && team.parent) {
-          var parentSlug = team.parent.slug;
-          parentName = team.parent.name;
-          if (parentRepoCache[parentSlug] === undefined) {
-            var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
-            parentRepoCache[parentSlug] = {};
-            for (var p = 0; p < parentRepos.length; p++) {
-              parentRepoCache[parentSlug][parentRepos[p].url] = parentRepos[p].permission;
-            }
-          }
-          parentRepoPerms = parentRepoCache[parentSlug];
-        }
-
         for (var j = 0; j < repos.length; j++) {
           var key = repos[j].url;
-          // Inherited = exists in parent AND child permission is not higher than parent
-          var inherited = false;
-          if (parentRepoPerms && parentRepoPerms[key] !== undefined) {
-            var childIdx = PERM_ORDER.indexOf(repos[j].permission);
-            var parentIdx = PERM_ORDER.indexOf(parentRepoPerms[key]);
-            // Lower index = higher permission. If child <= parent level, it's inherited.
-            inherited = childIdx >= parentIdx;
-          }
           if (!seen[key]) {
-            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited, parentTeam: inherited ? parentName : null }];
+            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: false }];
             seen[key] = repos[j];
             allRepos.push(repos[j]);
           } else {
-            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: inherited, parentTeam: inherited ? parentName : null });
+            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission, inherited: false });
             seen[key].permission = highestPermission(seen[key].teams);
+          }
+        }
+      }
+
+      // Step 2: Check actual team assignments per repo to detect inheritance
+      var childTeamSlugs = state.selectedTeams.filter(function (slug) {
+        var t = state.teams.find(function (x) { return x.slug === slug; });
+        return t && t.parent;
+      });
+      if (childTeamSlugs.length > 0) {
+        for (var ri = 0; ri < allRepos.length; ri++) {
+          var repo = allRepos[ri];
+          var needsCheck = repo.teams.some(function (t) { return childTeamSlugs.indexOf(t.slug) !== -1; });
+          if (!needsCheck) continue;
+          try {
+            var directTeams = await GitHubAPI.fetchRepoTeams(token, org, repo.name);
+            var directSlugs = {};
+            for (var di = 0; di < directTeams.length; di++) {
+              directSlugs[directTeams[di].slug] = directTeams[di].permission;
+            }
+            for (var ti = 0; ti < repo.teams.length; ti++) {
+              var entry = repo.teams[ti];
+              if (childTeamSlugs.indexOf(entry.slug) !== -1) {
+                if (!directSlugs[entry.slug]) {
+                  // Team not directly assigned → inherited
+                  entry.inherited = true;
+                  var parentTeam = state.teams.find(function (x) { return x.slug === entry.slug; });
+                  entry.parentTeam = parentTeam && parentTeam.parent ? parentTeam.parent.name : null;
+                } else {
+                  // Directly assigned → use actual permission from repo teams API
+                  entry.permission = directSlugs[entry.slug];
+                  entry.inherited = false;
+                }
+              }
+            }
+            repo.permission = highestPermission(repo.teams);
+          } catch (e) {
+            // If repo teams fetch fails, keep as-is
           }
         }
       }
