@@ -54,7 +54,10 @@
       darkToggle: $('dark-toggle'),
       langSwitcher: $('lang-switcher'),
       patHelpBtn: $('pat-help-btn'),
-      patHelpPanel: $('pat-help-panel')
+      patHelpPanel: $('pat-help-panel'),
+      patToggleBtn: $('pat-toggle-btn'),
+      patIconShow: $('pat-icon-show'),
+      patIconHide: $('pat-icon-hide')
     };
   }
 
@@ -251,12 +254,19 @@
       var seen = {};
       var allRepos = [];
       for (var i = 0; i < state.selectedTeams.length; i++) {
-        var repos = await GitHubAPI.fetchTeamRepos(token, org, state.selectedTeams[i]);
+        var teamSlug = state.selectedTeams[i];
+        var team = state.teams.find(function (t) { return t.slug === teamSlug; });
+        var teamName = team ? team.name : teamSlug;
+        var repos = await GitHubAPI.fetchTeamRepos(token, org, teamSlug);
         for (var j = 0; j < repos.length; j++) {
           var key = repos[j].url;
           if (!seen[key]) {
-            seen[key] = true;
+            repos[j].teams = [{ name: teamName, slug: teamSlug, permission: repos[j].permission }];
+            seen[key] = repos[j];
             allRepos.push(repos[j]);
+          } else {
+            seen[key].teams.push({ name: teamName, slug: teamSlug, permission: repos[j].permission });
+            seen[key].permission = highestPermission(seen[key].teams);
           }
         }
       }
@@ -365,6 +375,21 @@
     pull:     'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
   };
 
+  var PERM_LABELS = {
+    admin: 'Admin', maintain: 'Maintain', push: 'Write', triage: 'Triage', pull: 'Read'
+  };
+
+  var PERM_ORDER = ['admin', 'maintain', 'push', 'triage', 'pull'];
+
+  function highestPermission(teams) {
+    var best = 4;
+    for (var i = 0; i < teams.length; i++) {
+      var idx = PERM_ORDER.indexOf(teams[i].permission);
+      if (idx !== -1 && idx < best) best = idx;
+    }
+    return PERM_ORDER[best];
+  }
+
   // Visibility: lock icon for private, globe for public
   var VISIBILITY_ICON = {
     'private': '<svg class="w-3.5 h-3.5 text-yellow-500 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20" title="private"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>',
@@ -391,8 +416,36 @@
       var permClass = PERM_COLORS[r.permission] || PERM_COLORS.pull;
       var visIcon = VISIBILITY_ICON[r.visibility] || VISIBILITY_ICON['public'];
 
+      // Build teams badges
+      var teamsHtml = '';
+      if (r.teams && r.teams.length > 0) {
+        for (var ti = 0; ti < r.teams.length; ti++) {
+          teamsHtml += '<span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 whitespace-nowrap">' + escHtml(r.teams[ti].name) + '</span>';
+        }
+      }
+
+      // Build permission display
+      var permHtml = '';
+      var uniquePerms = {};
+      if (r.teams && r.teams.length > 1) {
+        for (var pi = 0; pi < r.teams.length; pi++) { uniquePerms[r.teams[pi].permission] = true; }
+      }
+      var hasDiffPerms = Object.keys(uniquePerms).length > 1;
+
+      if (hasDiffPerms) {
+        for (var pi2 = 0; pi2 < r.teams.length; pi2++) {
+          var tp = r.teams[pi2];
+          var tpClass = PERM_COLORS[tp.permission] || PERM_COLORS.pull;
+          permHtml += '<span class="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ' + tpClass + '">'
+            + '<span class="opacity-60">' + escHtml(tp.name) + ':</span> ' + (PERM_LABELS[tp.permission] || tp.permission)
+            + '</span>';
+        }
+      } else {
+        permHtml = '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ' + permClass + '">' + (PERM_LABELS[r.permission] || r.permission) + '</span>';
+      }
+
       html += '<tr class="' + rowBg + '">'
-        // Name (wide) with visibility icon
+        // Name with visibility icon
         + '<td class="px-5 py-3">'
           + '<div class="flex items-center gap-2">'
             + visIcon
@@ -404,12 +457,12 @@
         + '<td class="px-5 py-3 text-gray-500 dark:text-gray-400">'
           + '<span class="block truncate" title="' + escHtml(r.description || '') + '">' + escHtml(r.description || '—') + '</span>'
         + '</td>'
+        // Teams
+        + '<td class="px-5 py-3"><div class="flex flex-wrap gap-1">' + teamsHtml + '</div></td>'
         // Updated
         + '<td class="px-5 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">' + I18n.formatDate(r.updatedAt) + '</td>'
         // Permission
-        + '<td class="px-5 py-3 text-center">'
-          + '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ' + permClass + '">' + escHtml(r.permission) + '</span>'
-        + '</td>'
+        + '<td class="px-5 py-3 text-center"><div class="flex flex-wrap justify-center gap-1">' + permHtml + '</div></td>'
         + '</tr>';
     }
     els.tbody.innerHTML = html;
@@ -452,6 +505,13 @@
     });
     els.patHelpBtn.addEventListener('click', function () {
       els.patHelpPanel.classList.toggle('open');
+    });
+
+    els.patToggleBtn.addEventListener('click', function () {
+      var isPassword = els.pat.type === 'password';
+      els.pat.type = isPassword ? 'text' : 'password';
+      els.patIconShow.classList.toggle('hidden', isPassword);
+      els.patIconHide.classList.toggle('hidden', !isPassword);
     });
 
     els.btnLoadTeams.addEventListener('click', loadTeams);

@@ -31,6 +31,11 @@
       'pat.help.details': 'Generate a token at GitHub > Settings > Developer settings > Personal access tokens. Required scopes: read:org for team access, repo for private repository access.',
       'pat.scope.readOrg': 'Required for team and organization access',
       'pat.scope.repo': 'Required for private repository access',
+      'pat.security.title': 'Is my token safe?',
+      'pat.security.noBackend': 'This app runs entirely in your browser — no backend server, your token is never sent anywhere except GitHub API.',
+      'pat.security.sessionOnly': 'Your token is stored in sessionStorage and is cleared when you close the tab.',
+      'pat.security.openSource': 'The source code is publicly available — you can verify this yourself.',
+      'pat.security.fineGrained': 'We recommend using a fine-grained PAT with read-only access, scoped to your organization only.',
 
       // Buttons
       'button.scan': 'Scan',
@@ -43,6 +48,7 @@
       'table.language': 'Language',
       'table.updated': 'Updated',
       'table.created': 'Created',
+      'table.teams': 'Teams',
       'table.visibility': 'Visibility',
       'table.archived': 'Archived',
 
@@ -122,6 +128,11 @@
       'pat.help.details': 'GitHub > Settings > Developer settings > Personal access tokens에서 토큰을 생성하세요. 필요한 스코프: 팀 접근을 위한 read:org, 비공개 저장소 접근을 위한 repo.',
       'pat.scope.readOrg': '팀 및 조직 정보 접근에 필요',
       'pat.scope.repo': '비공개 저장소 접근에 필요',
+      'pat.security.title': '내 토큰은 안전한가요?',
+      'pat.security.noBackend': '이 앱은 브라우저에서만 실행됩니다 — 백엔드 서버가 없으며, 토큰은 GitHub API 외에 어디로도 전송되지 않습니다.',
+      'pat.security.sessionOnly': '토큰은 sessionStorage에 저장되며, 탭을 닫으면 자동으로 삭제됩니다.',
+      'pat.security.openSource': '소스 코드가 공개되어 있으므로 직접 확인할 수 있습니다.',
+      'pat.security.fineGrained': 'Fine-grained PAT을 사용하여 read-only 권한으로, 해당 조직에만 범위를 제한하는 것을 권장합니다.',
 
       // Buttons
       'button.scan': '스캔',
@@ -134,6 +145,7 @@
       'table.language': '언어',
       'table.updated': '수정일',
       'table.created': '생성일',
+      'table.teams': '소속 팀',
       'table.visibility': '공개 범위',
       'table.archived': '보관 여부',
 
