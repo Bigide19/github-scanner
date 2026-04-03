@@ -287,60 +287,58 @@
           setProgress((i + 1) / state.selectedTeams.length * 30);
         }
 
-        // ── Phase 2: Inheritance check (batched) ──
+        // ── Phase 2: Inheritance check (parent team comparison) ──
         var childTeamSlugs = state.selectedTeams.filter(function (slug) {
           var t = state.teams.find(function (x) { return x.slug === slug; });
           return t && t.parent;
         });
         if (childTeamSlugs.length > 0 && !state.scanAborted) {
-          var reposToCheck = allRepos.filter(function (r) {
-            return r.teams.some(function (t) { return childTeamSlugs.indexOf(t.slug) !== -1; });
-          });
-          var totalCheck = reposToCheck.length;
-          var BATCH = 10;
-          els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: 0, total: totalCheck });
-          for (var bi = 0; bi < reposToCheck.length; bi += BATCH) {
-            if (state.scanAborted) break;
-            var batchRepos = reposToCheck.slice(bi, bi + BATCH);
-            var batchResults = await Promise.all(batchRepos.map(function (repo) {
-              return GitHubAPI.fetchRepoTeams(token, org, repo.name)
-                .then(function (teams) { return { repo: repo, teams: teams }; })
-                .catch(function (err) { return { repo: repo, error: err }; });
-            }));
+          // Collect unique parent slugs to fetch
+          var parentMap = {}; // parentSlug -> [childSlug, ...]
+          for (var ci = 0; ci < childTeamSlugs.length; ci++) {
+            var childTeam = state.teams.find(function (x) { return x.slug === childTeamSlugs[ci]; });
+            if (childTeam && childTeam.parent) {
+              var ps = childTeam.parent.slug;
+              if (!parentMap[ps]) parentMap[ps] = [];
+              parentMap[ps].push(childTeamSlugs[ci]);
+            }
+          }
+          var parentSlugs = Object.keys(parentMap);
+          els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: 0, total: parentSlugs.length });
 
-            var rateLimited = false;
-            for (var br = 0; br < batchResults.length; br++) {
-              var item = batchResults[br];
-              if (item.error) {
-                if (item.error.message && item.error.message.indexOf('Rate limited') !== -1) {
-                  showError(item.error.message); rateLimited = true;
-                }
-                continue;
+          for (var pi = 0; pi < parentSlugs.length; pi++) {
+            if (state.scanAborted) break;
+            var parentSlug = parentSlugs[pi];
+            try {
+              var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
+              var parentRepoUrls = {};
+              for (var pr = 0; pr < parentRepos.length; pr++) {
+                parentRepoUrls[parentRepos[pr].url] = true;
               }
-              var directSlugs = {};
-              for (var di = 0; di < item.teams.length; di++) {
-                directSlugs[item.teams[di].slug] = item.teams[di].permission;
-              }
-              for (var ti = 0; ti < item.repo.teams.length; ti++) {
-                var entry = item.repo.teams[ti];
-                if (childTeamSlugs.indexOf(entry.slug) !== -1) {
-                  if (!directSlugs[entry.slug]) {
-                    entry.inherited = true;
-                    var parentTeam = state.teams.find(function (x) { return x.slug === entry.slug; });
-                    entry.parentTeam = parentTeam && parentTeam.parent ? parentTeam.parent.name : null;
-                  } else {
-                    entry.permission = directSlugs[entry.slug];
-                    entry.inherited = false;
+              var childSlugsForParent = parentMap[parentSlug];
+              for (var ri = 0; ri < allRepos.length; ri++) {
+                var repo = allRepos[ri];
+                for (var ti = 0; ti < repo.teams.length; ti++) {
+                  var entry = repo.teams[ti];
+                  if (childSlugsForParent.indexOf(entry.slug) !== -1) {
+                    if (parentRepoUrls[repo.url]) {
+                      entry.inherited = true;
+                      var ct = state.teams.find(function (x) { return x.slug === entry.slug; });
+                      entry.parentTeam = ct && ct.parent ? ct.parent.name : null;
+                    } else {
+                      entry.inherited = false;
+                    }
                   }
                 }
+                repo.permission = highestPermission(repo.teams);
               }
-              item.repo.permission = highestPermission(item.repo.teams);
+            } catch (err) {
+              if (err.message && err.message.indexOf('Rate limited') !== -1) {
+                showError(err.message); break;
+              }
             }
-
-            var checked = Math.min(bi + BATCH, totalCheck);
-            els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: checked, total: totalCheck });
-            setProgress(30 + (checked / totalCheck) * (hasUser ? 30 : 70));
-            if (rateLimited) break;
+            els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: pi + 1, total: parentSlugs.length });
+            setProgress(30 + ((pi + 1) / parentSlugs.length) * (hasUser ? 30 : 70));
           }
         }
       }
