@@ -311,9 +311,9 @@
             var parentSlug = parentSlugs[pi];
             try {
               var parentRepos = await GitHubAPI.fetchTeamRepos(token, org, parentSlug);
-              var parentRepoUrls = {};
+              var parentRepoMap = {}; // url -> permission
               for (var pr = 0; pr < parentRepos.length; pr++) {
-                parentRepoUrls[parentRepos[pr].url] = true;
+                parentRepoMap[parentRepos[pr].url] = parentRepos[pr].permission;
               }
               var childSlugsForParent = parentMap[parentSlug];
               for (var ri = 0; ri < allRepos.length; ri++) {
@@ -321,12 +321,18 @@
                 for (var ti = 0; ti < repo.teams.length; ti++) {
                   var entry = repo.teams[ti];
                   if (childSlugsForParent.indexOf(entry.slug) !== -1) {
-                    if (parentRepoUrls[repo.url]) {
+                    var parentPerm = parentRepoMap[repo.url];
+                    if (parentPerm === undefined) {
+                      // Not in parent team → direct
+                      entry.inherited = false;
+                    } else if (parentPerm !== entry.permission) {
+                      // In parent but different permission → child has direct assignment
+                      entry.inherited = false;
+                    } else {
+                      // Same permission as parent → inherited
                       entry.inherited = true;
                       var ct = state.teams.find(function (x) { return x.slug === entry.slug; });
                       entry.parentTeam = ct && ct.parent ? ct.parent.name : null;
-                    } else {
-                      entry.inherited = false;
                     }
                   }
                 }
