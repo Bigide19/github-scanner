@@ -105,6 +105,7 @@
       'status.empty': 'No repos found',
       'status.resultCount': '{count} repos',
       'status.copiedToClipboard': 'Copied!',
+      'status.tokenScope': 'Only repos accessible to your token are shown.',
 
       // Errors
       'error.generic': 'Something went wrong. Try again.',
@@ -209,6 +210,7 @@
       'status.empty': '결과 없음',
       'status.resultCount': '{count}개 레포',
       'status.copiedToClipboard': '복사됨!',
+      'status.tokenScope': '토큰이 접근 가능한 레포만 표시됩니다.',
 
       // Errors
       'error.generic': '오류 발생. 다시 시도하세요.',
