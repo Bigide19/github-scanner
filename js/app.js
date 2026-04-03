@@ -284,7 +284,7 @@
               seen[key].permission = highestPermission(seen[key].teams);
             }
           }
-          setProgress((i + 1) / state.selectedTeams.length * 30, (i + 1) + ' / ' + state.selectedTeams.length + ' teams');
+          setProgress((i + 1) / state.selectedTeams.length * 30);
         }
 
         // ── Phase 2: Inheritance check (batched) ──
@@ -339,7 +339,7 @@
 
             var checked = Math.min(bi + BATCH, totalCheck);
             els.loadingText.textContent = I18n.t('status.scanTeamProgress', { current: checked, total: totalCheck });
-            setProgress(30 + (checked / totalCheck) * (hasUser ? 30 : 70), checked + ' / ' + totalCheck);
+            setProgress(30 + (checked / totalCheck) * (hasUser ? 30 : 70));
             if (rateLimited) break;
           }
         }
@@ -355,7 +355,7 @@
           token, org, usernames,
           function (fetched, total) {
             var pct = baseProgress + (fetched / total) * progressRange;
-            setProgress(pct, fetched + ' / ' + total);
+            setProgress(pct);
             els.loadingText.textContent = I18n.t('status.scanProgress', { current: fetched, total: total });
           },
           function () { return state.scanAborted; }
@@ -403,16 +403,17 @@
     }
   }
 
-  function setProgress(pct, detail) {
+  function setProgress(pct) {
     if (pct < 0) {
       // Indeterminate
       els.progressBar.classList.add('indeterminate');
       els.progressBar.style.width = '';
       els.progressDetail.textContent = '';
     } else {
+      var rounded = Math.round(pct);
       els.progressBar.classList.remove('indeterminate');
-      els.progressBar.style.width = Math.round(pct) + '%';
-      els.progressDetail.textContent = detail || '';
+      els.progressBar.style.width = rounded + '%';
+      els.progressDetail.textContent = rounded + '%';
     }
   }
 

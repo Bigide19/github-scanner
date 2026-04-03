@@ -139,9 +139,9 @@ body {
   width: 100% !important;
   background: linear-gradient(
     90deg,
-    rgba(99, 102, 241, 0.2) 0%,
-    rgba(99, 102, 241, 0.8) 50%,
-    rgba(99, 102, 241, 0.2) 100%
+    rgba(99, 102, 241, 0.15) 0%,
+    rgba(139, 92, 246, 0.7) 50%,
+    rgba(99, 102, 241, 0.15) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
@@ -150,6 +150,12 @@ body {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+
+}
+
+/* --- Progress bar glow effect --- */
+.progress-bar-fill:not(.indeterminate) {
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
 /* --- Table row hover highlight --- */

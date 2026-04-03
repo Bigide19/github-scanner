@@ -18,7 +18,7 @@
       'page.header': 'GitHub Scanner',
 
       // Input labels
-      'label.pat': 'Personal Access Token (PAT)',
+      'label.pat': 'Token (PAT)',
       'label.org': 'Organization',
       'label.team': 'Team',
 
@@ -27,29 +27,29 @@
 
       // PAT help
       'pat.help.title': 'PAT Help',
-      'pat.help.tooltip': 'Your token needs the read:org scope to access team information and the repo scope to access private repositories.',
-      'pat.help.details': 'Generate a token at GitHub > Settings > Developer settings > Personal access tokens. Required scopes: read:org for team access, repo for private repository access.',
-      'pat.scope.readOrg': 'Required for team and organization access',
-      'pat.scope.repo': 'Required for private repository access',
+      'pat.help.tooltip': 'Needs read:org and repo scopes.',
+      'pat.help.details': 'GitHub > Settings > Developer settings > Personal access tokens. Scopes: read:org, repo.',
+      'pat.scope.readOrg': 'Team & org access',
+      'pat.scope.repo': 'Private repo access',
       'pat.security.title': 'Is my token safe?',
-      'pat.security.noBackend': 'This app runs entirely in your browser — no backend server, your token is never sent anywhere except GitHub API.',
-      'pat.security.sessionOnly': 'Your token is stored in sessionStorage and is cleared when you close the tab.',
-      'pat.security.openSource': 'The source code is publicly available — you can verify this yourself.',
-      'pat.security.fineGrained': 'We recommend using a fine-grained PAT with read-only access, scoped to your organization only.',
+      'pat.security.noBackend': 'Runs in your browser only — token is sent to GitHub API and nowhere else.',
+      'pat.security.sessionOnly': 'Stored in sessionStorage — cleared when you close the tab.',
+      'pat.security.openSource': 'Source code is public — verify it yourself.',
+      'pat.security.fineGrained': 'Use a fine-grained PAT with read-only, org-scoped access.',
 
       // User scan
       'label.username': 'Username (comma-separated)',
-      'status.scanProgress': 'Checking repos... ({current}/{total})',
-      'status.scanTeamProgress': 'Checking team assignments... ({current}/{total})',
+      'status.scanProgress': 'Repos {current}/{total}',
+      'status.scanTeamProgress': 'Teams {current}/{total}',
       'status.userDirect': 'Direct',
-      'status.cancelled': 'Scan cancelled',
+      'status.cancelled': 'Cancelled',
 
       // Buttons
       'button.scan': 'Scan',
       'button.scanUser': 'Scan User',
       'button.cancel': 'Cancel',
-      'button.copyMarkdown': 'Copy Markdown',
-      'button.downloadCsv': 'Download CSV',
+      'button.copyMarkdown': 'Markdown',
+      'button.downloadCsv': 'CSV',
 
       // Table headers
       'table.name': 'Name',
@@ -62,25 +62,25 @@
       'table.archived': 'Archived',
 
       // Filters
-      'filter.showArchived': 'Show Archived',
+      'filter.showArchived': 'Archived',
       'filter.visibility': 'Visibility',
       'filter.visibility.all': 'All',
       'filter.visibility.public': 'Public',
       'filter.visibility.private': 'Private',
 
       // Team
-      'team.loadBtn': 'Load Teams',
-      'team.loading': 'Loading teams...',
-      'team.placeholder': 'Select teams...',
-      'team.selectAll': 'Select All',
-      'team.deselectAll': 'Deselect All',
-      'team.selected': '{count} team(s) selected',
+      'team.loadBtn': 'Load',
+      'team.loading': 'Loading...',
+      'team.placeholder': 'Select...',
+      'team.selectAll': 'All',
+      'team.deselectAll': 'None',
+      'team.selected': '{count} selected',
       'team.inherited': 'Inherited from parent team',
       'team.inheritedFrom': 'Inherited from {parent}',
 
       // Filters
-      'filter.showArchived': 'Show Archived',
-      'filter.includeInherited': 'Include inherited repos',
+      'filter.showArchived': 'Archived',
+      'filter.includeInherited': 'Inherited',
       'filter.visibility': 'Visibility',
       'filter.visibility.all': 'All',
       'filter.visibility.public': 'Public',
@@ -94,31 +94,31 @@
       'filter.permission.pull': 'Read',
 
       // Pagination
-      'pagination.perPage': 'Per page',
-      'pagination.page': 'Page {current} of {total}',
-      'pagination.prev': 'Previous',
+      'pagination.perPage': 'Rows',
+      'pagination.page': '{current} / {total}',
+      'pagination.prev': 'Prev',
       'pagination.next': 'Next',
 
       // Status messages
-      'status.loading': 'Loading repositories...',
-      'status.loadingTeams': 'Fetching team repositories...',
-      'status.empty': 'No repositories found',
-      'status.resultCount': '{count} repositories found',
-      'status.copiedToClipboard': 'Copied to clipboard',
+      'status.loading': 'Loading...',
+      'status.loadingTeams': 'Loading repos...',
+      'status.empty': 'No repos found',
+      'status.resultCount': '{count} repos',
+      'status.copiedToClipboard': 'Copied!',
 
       // Errors
-      'error.generic': 'An error occurred. Please try again.',
-      'error.rateLimit': 'GitHub API rate limit exceeded. Please wait and try again later.',
-      'error.unauthorized': 'Unauthorized. Please check your Personal Access Token.',
-      'error.notFound': 'Not found. Please verify the organization and team slug.',
-      'error.noTeamSelected': 'Please select at least one team.',
-      'error.noSelection': 'Please select at least one team or enter a username.',
+      'error.generic': 'Something went wrong. Try again.',
+      'error.rateLimit': 'Rate limit hit. Try again later.',
+      'error.unauthorized': 'Bad token. Check your PAT.',
+      'error.notFound': 'Not found. Check org and team.',
+      'error.noTeamSelected': 'Select a team first.',
+      'error.noSelection': 'Select a team or enter a username.',
 
       // Dark mode
-      'darkMode.toggle': 'Dark Mode',
+      'darkMode.toggle': 'Dark',
 
       // Language switcher
-      'lang.switch': 'Language',
+      'lang.switch': 'Lang',
       'lang.en': 'English',
       'lang.ko': 'Korean'
     },
@@ -129,7 +129,7 @@
       'page.header': 'GitHub Scanner',
 
       // Input labels
-      'label.pat': '개인 액세스 토큰 (PAT)',
+      'label.pat': '토큰 (PAT)',
       'label.org': '조직',
       'label.team': '팀',
 
@@ -150,17 +150,17 @@
 
       // User scan
       'label.username': '사용자명 (쉼표로 구분)',
-      'status.scanProgress': '레포 확인 중... ({current}/{total})',
-      'status.scanTeamProgress': '팀 할당 확인 중... ({current}/{total})',
-      'status.userDirect': '직접 권한',
-      'status.cancelled': '스캔이 취소되었습니다',
+      'status.scanProgress': '레포 {current}/{total}',
+      'status.scanTeamProgress': '팀 {current}/{total}',
+      'status.userDirect': '직접',
+      'status.cancelled': '취소됨',
 
       // Buttons
       'button.scan': '스캔',
       'button.scanUser': '사용자 스캔',
       'button.cancel': '취소',
-      'button.copyMarkdown': '마크다운 복사',
-      'button.downloadCsv': 'CSV 다운로드',
+      'button.copyMarkdown': '마크다운',
+      'button.downloadCsv': 'CSV',
 
       // Table headers
       'table.name': '이름',
@@ -173,18 +173,18 @@
       'table.archived': '보관 여부',
 
       // Team
-      'team.loadBtn': '팀 불러오기',
-      'team.loading': '팀 목록 로딩 중...',
-      'team.placeholder': '팀을 선택하세요...',
-      'team.selectAll': '전체 선택',
-      'team.deselectAll': '전체 해제',
-      'team.selected': '{count}개 팀 선택됨',
+      'team.loadBtn': '불러오기',
+      'team.loading': '로딩 중...',
+      'team.placeholder': '선택...',
+      'team.selectAll': '전체',
+      'team.deselectAll': '해제',
+      'team.selected': '{count}개 선택',
       'team.inherited': '상위 팀에서 상속됨',
       'team.inheritedFrom': '{parent}에서 상속됨',
 
       // Filters
-      'filter.showArchived': '보관된 항목 표시',
-      'filter.includeInherited': '상속된 레포 포함',
+      'filter.showArchived': '보관됨',
+      'filter.includeInherited': '상속 포함',
       'filter.visibility': '공개 범위',
       'filter.visibility.all': 'All',
       'filter.visibility.public': 'Public',
@@ -198,28 +198,28 @@
       'filter.permission.pull': 'Read',
 
       // Pagination
-      'pagination.perPage': '페이지당',
-      'pagination.page': '{total} 중 {current} 페이지',
+      'pagination.perPage': '행',
+      'pagination.page': '{current} / {total}',
       'pagination.prev': '이전',
       'pagination.next': '다음',
 
       // Status messages
-      'status.loading': '저장소 로딩 중...',
-      'status.loadingTeams': '팀 레포지토리 가져오는 중...',
-      'status.empty': '저장소를 찾을 수 없습니다',
-      'status.resultCount': '{count}개의 저장소를 찾았습니다',
-      'status.copiedToClipboard': '클립보드에 복사되었습니다',
+      'status.loading': '로딩 중...',
+      'status.loadingTeams': '레포 로딩 중...',
+      'status.empty': '결과 없음',
+      'status.resultCount': '{count}개 레포',
+      'status.copiedToClipboard': '복사됨!',
 
       // Errors
-      'error.generic': '오류가 발생했습니다. 다시 시도해 주세요.',
-      'error.rateLimit': 'GitHub API 호출 제한을 초과했습니다. 잠시 후 다시 시도해 주세요.',
-      'error.unauthorized': '인증에 실패했습니다. 개인 액세스 토큰을 확인해 주세요.',
-      'error.notFound': '찾을 수 없습니다. 조직명과 팀을 확인해 주세요.',
-      'error.noTeamSelected': '팀을 하나 이상 선택해 주세요.',
-      'error.noSelection': '팀을 선택하거나 사용자명을 입력해 주세요.',
+      'error.generic': '오류 발생. 다시 시도하세요.',
+      'error.rateLimit': 'API 제한 초과. 잠시 후 재시도.',
+      'error.unauthorized': '토큰 오류. PAT를 확인하세요.',
+      'error.notFound': '찾을 수 없음. 조직/팀 확인.',
+      'error.noTeamSelected': '팀을 선택하세요.',
+      'error.noSelection': '팀 또는 사용자명을 입력하세요.',
 
       // Dark mode
-      'darkMode.toggle': '다크 모드',
+      'darkMode.toggle': '다크',
 
       // Language switcher
       'lang.switch': '언어',

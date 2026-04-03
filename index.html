@@ -140,15 +140,21 @@
 
     <!-- ── Loading ── -->
     <div id="loading" class="hidden mb-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <div class="flex items-center justify-between mb-3">
-          <span id="loading-text" class="text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="status.loading">Loading repositories...</span>
-          <button type="button" id="btn-cancel-scan" class="text-sm text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" data-i18n="button.cancel">Cancel</button>
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="relative w-5 h-5">
+              <div class="absolute inset-0 rounded-full border-2 border-indigo-200 dark:border-indigo-800"></div>
+              <div class="absolute inset-0 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <span id="loading-text" class="text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="status.loading">Loading...</span>
+          </div>
+          <button type="button" id="btn-cancel-scan" class="text-xs font-medium px-3 py-1 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400 transition-all" data-i18n="button.cancel">Cancel</button>
         </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-          <div id="progress-bar" class="progress-bar-fill bg-indigo-500 h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+        <div class="relative w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+          <div id="progress-bar" class="progress-bar-fill bg-gradient-to-r from-indigo-500 to-violet-500 h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
         </div>
-        <div id="progress-detail" class="mt-2 text-xs text-gray-400 dark:text-gray-500 text-right"></div>
+        <div id="progress-detail" class="mt-2 text-xs font-mono text-gray-400 dark:text-gray-500 text-right tabular-nums"></div>
       </div>
     </div>
 
