@@ -277,16 +277,16 @@
 
   /**
    * Fetch org repos with direct collaborators via GraphQL.
-   * Returns repos where the given user has direct access.
+   * Returns repos where any of the given users has direct access.
    *
    * @param {string} token
    * @param {string} org
-   * @param {string} username
+   * @param {Array<string>} usernames - lowercase usernames to match
    * @param {Function} onProgress - called with (fetched, total)
    * @param {Function} shouldAbort - return true to stop
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array>} each result has an extra `_matchedUser` field
    */
-  async function fetchUserDirectRepos(token, org, username, onProgress, shouldAbort) {
+  async function fetchUserDirectRepos(token, org, usernames, onProgress, shouldAbort) {
     var QUERY = 'query($org: String!, $cursor: String) {\n'
       + '  organization(login: $org) {\n'
       + '    repositories(first: 100, after: $cursor) {\n'
@@ -325,7 +325,8 @@
         if (!node.collaborators) continue;
         var edges = node.collaborators.edges;
         for (var j = 0; j < edges.length; j++) {
-          if (edges[j].node.login.toLowerCase() === username.toLowerCase()) {
+          var login = edges[j].node.login.toLowerCase();
+          if (usernames.indexOf(login) !== -1) {
             results.push({
               name: node.name,
               description: node.description,
@@ -336,9 +337,9 @@
               visibility: (node.visibility || '').toLowerCase(),
               archived: node.isArchived,
               stars: node.stargazerCount,
-              permission: GQL_PERM_MAP[edges[j].permission] || 'pull'
+              permission: GQL_PERM_MAP[edges[j].permission] || 'pull',
+              _matchedUser: edges[j].node.login
             });
-            break;
           }
         }
       }

@@ -247,8 +247,8 @@
     var token = els.pat.value.trim();
     var org = els.org.value.trim();
     var hasTeams = state.selectedTeams.length > 0;
-    var username = els.username.value.trim();
-    var hasUser = !!username;
+    var usernames = els.username.value.split(',').map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
+    var hasUser = usernames.length > 0;
 
     if (!token || !org) return;
     if (!hasTeams && !hasUser) {
@@ -352,7 +352,7 @@
         var progressRange = hasTeams ? 40 : 100;
 
         var userRepos = await GitHubAPI.fetchUserDirectRepos(
-          token, org, username,
+          token, org, usernames,
           function (fetched, total) {
             var pct = baseProgress + (fetched / total) * progressRange;
             setProgress(pct, fetched + ' / ' + total);
@@ -363,7 +363,8 @@
 
         for (var ui = 0; ui < userRepos.length; ui++) {
           var uKey = userRepos[ui].url;
-          var userEntry = { name: username, slug: '_user_' + username, permission: userRepos[ui].permission, inherited: false };
+          var matched = userRepos[ui]._matchedUser;
+          var userEntry = { name: matched, slug: '_user_' + matched, permission: userRepos[ui].permission, inherited: false };
           if (!seen[uKey]) {
             userRepos[ui].teams = [userEntry];
             seen[uKey] = userRepos[ui];
@@ -605,7 +606,7 @@
         + '<td class="px-4 py-3">'
           + '<div class="flex items-center gap-1.5 min-w-0">'
             + visIcon
-            + '<a href="' + escHtml(r.url) + '" target="_blank" rel="noopener" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate">' + escHtml(r.name) + '</a>'
+            + '<a href="' + escHtml(r.url) + '" target="_blank" rel="noopener" onclick="window.open(this.href);return false;" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate">' + escHtml(r.name) + '</a>'
             + (r.archived ? '<span class="badge badge-archived text-[10px] flex-shrink-0">archived</span>' : '')
           + '</div>'
         + '</td>'

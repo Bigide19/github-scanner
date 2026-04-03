@@ -38,7 +38,7 @@
       'pat.security.fineGrained': 'We recommend using a fine-grained PAT with read-only access, scoped to your organization only.',
 
       // User scan
-      'label.username': 'Username',
+      'label.username': 'Username (comma-separated)',
       'status.scanProgress': 'Checking repos... ({current}/{total})',
       'status.scanTeamProgress': 'Checking team assignments... ({current}/{total})',
       'status.userDirect': 'Direct',
@@ -149,7 +149,7 @@
       'pat.security.fineGrained': 'Fine-grained PAT을 사용하여 read-only 권한으로, 해당 조직에만 범위를 제한하는 것을 권장합니다.',
 
       // User scan
-      'label.username': '사용자명',
+      'label.username': '사용자명 (쉼표로 구분)',
       'status.scanProgress': '레포 확인 중... ({current}/{total})',
       'status.scanTeamProgress': '팀 할당 확인 중... ({current}/{total})',
       'status.userDirect': '직접 권한',
