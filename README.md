@@ -2,16 +2,23 @@
 
 A client-side web tool that lists active repositories from GitHub Organization teams.
 
+## Why?
+
+GitHub doesn't show which repos a child team owns directly vs. inherits from its parent.
+GitHub Scanner detects inherited access by comparing parent/child team permissions, so you can filter down to only the repos your team actually manages.
+
 ## Features
 
-- Fetch repositories by organization team, with multi-team selection
-- Archive filtering (archived repos hidden by default)
+- **Inheritance detection** -- distinguishes direct vs. inherited team repo access (not available in GitHub UI)
+- Scan by team, user, or both -- results merged and deduplicated
+- Multi-team and multi-user selection
+- Filter by visibility, permission level, archived status, and inheritance
 - Column sorting by name, last updated, and permission level
-- Visibility and permission filters with multi-select
-- Export to Markdown (with links) for Confluence or CSV for spreadsheets -- exports all data with full columns
+- Export filtered results to Markdown (with links) or CSV
 - Dark mode with system preference detection and manual toggle
 - Internationalization: English and Korean
 - Client-side pagination (10 / 30 / 50 rows per page)
+- No backend -- runs entirely in the browser
 
 ## Screenshot
 
