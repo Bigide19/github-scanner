@@ -247,7 +247,7 @@
     var token = els.pat.value.trim();
     var org = els.org.value.trim();
     var hasTeams = state.selectedTeams.length > 0;
-    var usernames = els.username.value.split(',').map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
+    var usernames = els.username.value.split(/[,，、\s]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
     var hasUser = usernames.length > 0;
 
     if (!token || !org) return;
