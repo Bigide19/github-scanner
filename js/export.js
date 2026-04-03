@@ -52,7 +52,7 @@ const Exporter = (() => {
 
     const rows = (repos || []).map((repo) => {
       const name = `[${repo.name}](${repo.url})`;
-      const description = truncate(repo.description, 50);
+      const description = repo.description || '';
       const language = repo.language || '';
       const teams = formatTeams(repo);
       const teamPerms = formatTeamPermissions(repo, '<br>');
