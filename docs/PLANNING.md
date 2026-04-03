@@ -117,9 +117,17 @@ github-scanner/
 - Required PAT scopes: `read:org` (team access), `repo` (private repos)
 - Permission derived from `permissions` object: admin > maintain > push > triage > pull
 
+### 10. SEO
+- Meta description, keywords, canonical URL
+- Open Graph tags for social sharing previews (Slack, Discord, KakaoTalk)
+- Twitter Card (summary_large_image)
+- JSON-LD structured data (`WebApplication` schema)
+
 ## Future Considerations
+- GitHub OAuth App (eliminate PAT requirement — needs serverless backend)
 - Multiple org support
 - Repository search/text filter within results
 - Bookmarkable URL with org/team pre-filled (query params)
 - SRI hash for Tailwind CDN
 - Real screenshot to replace mock SVG
+- Google Search Console registration
