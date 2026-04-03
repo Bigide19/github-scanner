@@ -630,17 +630,17 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // ── Export (always uses allRepos, not filtered/paged) ──
+  // ── Export (uses filtered list) ──
   function handleCopyMarkdown() {
-    if (!state.allRepos.length) return;
-    Exporter.copyMarkdown(state.allRepos).then(function () {
+    if (!state.filtered.length) return;
+    Exporter.copyMarkdown(state.filtered).then(function () {
       showToast(I18n.t('status.copiedToClipboard'));
     });
   }
 
   function handleDownloadCSV() {
-    if (!state.allRepos.length) return;
-    Exporter.downloadCSV(state.allRepos);
+    if (!state.filtered.length) return;
+    Exporter.downloadCSV(state.filtered);
   }
 
   // ── Session restore ────────────────────────────────────
