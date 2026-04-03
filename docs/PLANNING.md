@@ -27,22 +27,27 @@
 - Multiple teams supported — repos deduplicated by URL
 
 ### 3. Data Retrieval
-- GitHub REST API: `GET /orgs/{org}/teams/{team_slug}/repos`
-- Automatic pagination (100 per page, follows all pages)
-- Client-side filtering (archived, visibility, permission)
+- **Team repos:** REST API `GET /orgs/{org}/teams/{team_slug}/repos` with auto-pagination
+- **Inheritance detection:** `GET /repos/{owner}/{repo}/teams` to verify direct vs inherited team access (batched 10 concurrent)
+- **User direct permissions:** GraphQL API `collaborators(affiliation: DIRECT)` — 100 repos per query call
+- **Unified scan:** Teams and users (comma-separated) combined in single Scan action, deduped by URL
+- Client-side filtering (archived, visibility, permission, inherited)
 - Permission derived from API response permissions object (admin > maintain > push > triage > pull)
+- Permission labels: pull→Read, push→Write in display
 
 ### 4. Table Display
 
 | Column | Sortable | Notes |
 |--------|----------|-------|
-| Name | Yes | With visibility icon (lock/globe), links to repo URL |
+| Name | Yes | With visibility icon (lock/globe), links to repo URL (new tab) |
 | Description | No | Truncated with hover tooltip |
+| Teams/Users | No | Indigo badge (team), emerald badge (user), gray italic (inherited) |
 | Updated | Yes | Default sort (newest first) |
-| Permission | Yes | Color-coded badge (admin/maintain/push/triage/pull) |
+| Permission | Yes | Color-coded badge; per-team breakdown when permissions differ |
 
 ### 5. Filters
 - **Archived toggle** — Show/hide archived repos (hidden by default — core feature)
+- **Include inherited** — Show repos inherited from parent teams (hidden by default)
 - **Visibility** — All / Public / Private
 - **Permission** — Multi-select (admin, maintain, push, triage, pull)
 
@@ -58,13 +63,17 @@
 ### 8. UI/UX
 - Dark mode support (system preference + manual toggle)
 - Sticky header with backdrop blur
-- Loading spinner during API calls
-- Error handling with i18n-aware messages
-- Toast notifications for clipboard copy
+- Progress bar with shimmer animation + cancel button during scans
+- All buttons disabled during scan to prevent double-submit
+- Error handling with i18n-aware messages (including rate limit)
+- Toast notifications for clipboard copy and scan cancel
 - Zebra-striped table rows
-- Color-coded permission badges
+- Color-coded permission badges (Read/Write/Maintain/Admin/Triage)
 - Visibility shown as icon (lock for private, globe for public)
-- `table-fixed` layout to prevent horizontal scroll
+- `table-auto` layout with `overflow-x-auto` wrapper
+- Star button in header (PUT only, no unstar)
+- PAT visibility toggle + security explanation panel
+- GitHub source link in header
 
 ### 9. Internationalization (i18n)
 - English (default) and Korean
@@ -99,7 +108,11 @@ github-scanner/
 
 ## GitHub API Notes
 - Team repos endpoint does NOT support `archived` filter parameter — must fetch all and filter client-side
-- Pagination via `per_page=100` + `page` increment until response < perPage
+- Team repos endpoint returns inherited repos from parent teams — use `/repos/{owner}/{repo}/teams` to verify direct assignment
+- REST pagination via `per_page=100` + `page` increment until response < perPage
+- GraphQL: `collaborators(affiliation: DIRECT)` returns only directly assigned users, not team-based access
+- GraphQL rate limit: 5,000 points/hour, ~50 points per 100-repo page with collaborators
+- `fetchOrgTeams` response includes `parent` field for team hierarchy
 - Visible teams: any org member can query. Secret teams: only team members or org admins.
 - Required PAT scopes: `read:org` (team access), `repo` (private repos)
 - Permission derived from `permissions` object: admin > maintain > push > triage > pull
