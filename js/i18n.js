@@ -48,6 +48,7 @@
       'button.scan': 'Scan',
       'button.scanUser': 'Scan User',
       'button.cancel': 'Cancel',
+      'button.feedback': 'Feedback',
       'button.copyMarkdown': 'Markdown',
       'button.downloadCsv': 'CSV',
 
@@ -160,6 +161,7 @@
       'button.scan': '스캔',
       'button.scanUser': '사용자 스캔',
       'button.cancel': '취소',
+      'button.feedback': '피드백',
       'button.copyMarkdown': '마크다운',
       'button.downloadCsv': 'CSV',
 
